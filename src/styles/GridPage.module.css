@@ -1,0 +1,162 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  position: relative;
+}
+
+.tabs {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tabButton {
+  border: none;
+  background: transparent;
+  color: #4b5563;
+  padding: 10px 14px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+}
+
+.activeTab {
+  color: #1f6fc2;
+  border-bottom-color: #1f6fc2;
+}
+
+.toolbarRight {
+  position: relative;
+}
+
+.filterButton {
+  height: 44px;
+  padding: 0 16px;
+  border: 1px solid #d9d9d9;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #374151;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.filterButtonText {
+  display: inline;
+}
+
+.filterPanel {
+  position: absolute;
+  top: 52px;
+  right: 0;
+  width: 240px;
+  padding: 12px;
+  background: #ffffff;
+  border: 1px solid #d9d9d9;
+  border-radius: 14px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+  z-index: 20;
+}
+
+.filterOption {
+  width: 100%;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 8px;
+  cursor: pointer;
+  color: #374151;
+  font-size: 0.95rem;
+  text-align: left;
+  border-radius: 8px;
+}
+
+.filterOption:hover {
+  background: #f8fafc;
+}
+
+.content {
+  width: 100%;
+}
+
+.cardsArea {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+@media (max-width: 1023px) {
+  .page {
+    gap: 16px;
+  }
+
+  .toolbar {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 12px;
+  }
+
+  .tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    width: 100%;
+    border-bottom: 1px solid #d9d9d9;
+  }
+
+  .tabButton {
+    width: 100%;
+    text-align: center;
+    padding: 12px 8px 10px;
+    border: none;
+    border-bottom: 3px solid transparent;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .activeTab {
+    color: #1f6fc2;
+    background: transparent;
+    border-bottom-color: #1f6fc2;
+  }
+
+  .toolbarRight {
+    width: auto;
+  }
+
+  .filterButton {
+    width: 48px;
+    min-width: 48px;
+    padding: 0;
+  }
+
+  .filterButtonText {
+    display: none;
+  }
+
+  .filterPanel {
+    width: min(260px, calc(100vw - 32px));
+    right: 0;
+  }
+
+  .cardsArea {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+}

@@ -1,0 +1,17 @@
+.wrapper {
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+.content {
+  padding: 16px;
+  padding-bottom: 110px;
+}
+
+@media (min-width: 1024px) {
+  .content {
+    margin-left: 220px;
+    padding: 24px 32px;
+    padding-bottom: 24px;
+  }
+}

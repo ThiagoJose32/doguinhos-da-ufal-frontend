@@ -1,0 +1,472 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.breadcrumbLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  color: #1f6fc2;
+  font-weight: 600;
+}
+
+.breadcrumbSeparator {
+  color: #9ca3af;
+  font-size: 1.1rem;
+}
+
+.breadcrumbCurrent {
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.topActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.primaryButton,
+.secondaryButton {
+  height: 44px;
+  border-radius: 10px;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primaryButton {
+  border: none;
+  background: #1f6fc2;
+  color: white;
+}
+
+.secondaryButton {
+  border: 1px solid #d9d9d9;
+  background: white;
+  color: #374151;
+}
+
+.heroSection {
+  display: grid;
+  grid-template-columns: minmax(320px, 1.2fr) minmax(280px, 1fr);
+  gap: 24px;
+}
+
+.imageColumn,
+.infoColumn,
+.descriptionCard,
+.quickActionCard,
+.historyCard {
+  background: white;
+  border: 1px solid #d9d9d9;
+  border-radius: 16px;
+}
+
+.imageColumn,
+.infoColumn,
+.descriptionCard,
+.historyCard {
+  padding: 20px;
+}
+
+.mainImage {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: contain;
+  border-radius: 12px;
+  display: block;
+  background: #f3f4f6;
+}
+
+.gallery {
+  margin-top: 14px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.thumbnailButton {
+  width: 92px;
+  height: 78px;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  padding: 0;
+  background: #f8fafc;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.thumbnailActive {
+  border-color: #1f6fc2;
+}
+
+.galleryImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  background: #f3f4f6;
+}
+
+.moreImagesButton {
+  width: 92px;
+  height: 78px;
+  border: 2px solid #d9e2ec;
+  border-radius: 10px;
+  background: #f8fafc;
+  color: #1f6fc2;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.animalName {
+  margin: 0;
+  font-size: 2rem;
+  color: #111827;
+}
+
+.adoptionBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #e9f9ee;
+  color: #2f9e44;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 24px;
+}
+
+.infoItem,
+.infoItemFull {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.infoItemFull {
+  grid-column: 1 / -1;
+}
+
+.infoLabel {
+  color: #9ca3af;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.infoValue {
+  color: #111827;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.sectionTitle,
+.historyTitle {
+  margin: 0 0 12px;
+  font-size: 1.2rem;
+  color: #111827;
+}
+
+.descriptionText {
+  margin: 0;
+  line-height: 1.6;
+  color: #374151;
+}
+
+.quickActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.quickActionCard {
+  border: 1px solid #d9d9d9;
+  background: white;
+  border-radius: 16px;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.quickActionIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #e8f1fb;
+  color: #1f6fc2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.quickActionTitle {
+  display: block;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.quickActionSubtitle {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.92rem;
+}
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.historyItem {
+  border-radius: 14px;
+  display: grid;
+  grid-template-columns: 120px 1fr auto;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid transparent;
+  align-items: start;
+}
+
+.historyWarning {
+  background: #fff1f1;
+  border-color: #ffd8d8;
+}
+
+.historySuccess {
+  background: #eef9ef;
+  border-color: #d7f0da;
+}
+
+.historyDate {
+  font-weight: 700;
+  color: #374151;
+}
+
+.historyItemTitle {
+  display: block;
+  margin-bottom: 6px;
+  color: #111827;
+}
+
+.historyDescription {
+  margin: 0;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+.historyStatus {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: white;
+  color: #6b7280;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.moreButton {
+  margin-top: 18px;
+  border: none;
+  background: transparent;
+  color: #1f6fc2;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.galleryModalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 100;
+}
+
+.galleryModal {
+  width: min(900px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+}
+
+.galleryModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.galleryModalTitle {
+  margin: 0;
+  font-size: 1.3rem;
+  color: #111827;
+}
+
+.closeModalButton {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #d9d9d9;
+  border-radius: 10px;
+  background: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.galleryModalGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.modalImageButton {
+  border: 2px solid transparent;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #f8fafc;
+  padding: 0;
+  cursor: pointer;
+}
+
+.modalImageActive {
+  border-color: #1f6fc2;
+}
+
+.modalImage {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  display: block;
+  background: #f3f4f6;
+}
+
+.notFoundBox {
+  background: white;
+  border: 1px solid #d9d9d9;
+  border-radius: 16px;
+  padding: 32px;
+}
+
+.notFoundTitle {
+  margin: 0 0 16px;
+  font-size: 1.8rem;
+}
+
+.backLink {
+  color: #1f6fc2;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+@media (max-width: 1023px) {
+  .topBar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .topActions {
+    justify-content: stretch;
+    flex-wrap: wrap;
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    justify-content: center;
+    flex: 1;
+  }
+
+  .heroSection {
+    grid-template-columns: 1fr;
+  }
+
+  .quickActions {
+    grid-template-columns: 1fr;
+  }
+
+  .historyItem {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .page {
+    gap: 16px;
+  }
+
+  .imageColumn,
+  .infoColumn,
+  .descriptionCard,
+  .historyCard {
+    padding: 16px;
+  }
+
+  .animalName {
+    font-size: 1.6rem;
+  }
+
+  .infoGrid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .thumbnailButton,
+  .moreImagesButton {
+    width: 76px;
+    height: 64px;
+  }
+
+  .galleryModal {
+    padding: 16px;
+  }
+
+  .galleryModalGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

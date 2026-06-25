@@ -1,53 +1,59 @@
 import { NavLink } from "react-router-dom";
-import { Dog, HandCoins, Users, Settings } from "lucide-react";
+import {
+  CircleDollarSign,
+  PawPrint,
+  Settings,
+  Users,
+} from "lucide-react";
 import styles from "./Sidebar.module.css";
 
-const navItems = [
+const menuItems = [
   {
+    to: "/app/animals",
     label: "Animais",
-    path: "/app/animals",
-    icon: Dog,
+    icon: PawPrint,
   },
   {
+    to: "/app/finance",
     label: "Verba",
-    path: "/app/finance",
-    icon: HandCoins,
+    icon: CircleDollarSign,
   },
   {
+    to: "/app/volunteers",
     label: "Voluntários",
-    path: "/app/volunteers",
     icon: Users,
   },
   {
+    to: "/app/settings",
     label: "Configurações",
-    path: "/app/settings",
     icon: Settings,
   },
 ];
 
 export default function Sidebar() {
   return (
-    <nav className={styles.container} aria-label="Navegação principal">
-      <div className={styles.logoArea}>
-        <div className={styles.logoIcon}>
-          <img src="src\assets\Logo.svg" alt="UserPhoto"/>
+    <aside className={styles.sidebar}>
+      <div className={styles.brand}>
+        <div className={styles.brandIcon}>
+          <PawPrint size={26} />
         </div>
-        <div className={styles.logoText}>
-          <strong>Doguinhos</strong>
-          <span>da UFAL</span>
+
+        <div className={styles.brandText}>
+          <strong className={styles.brandTitle}>Doguinhos</strong>
+          <span className={styles.brandSubtitle}>da UFAL</span>
         </div>
       </div>
 
-      <div className={styles.navList}>
-        {navItems.map((item) => {
+      <nav className={styles.nav}>
+        {menuItems.map((item) => {
           const Icon = item.icon;
 
           return (
             <NavLink
-              key={item.path}
-              to={item.path}
+              key={item.to}
+              to={item.to}
               className={({ isActive }) =>
-                `${styles.navItem} ${isActive ? styles.active : ""}`
+                `${styles.link} ${isActive ? styles.active : ""}`
               }
             >
               <Icon size={20} />
@@ -55,21 +61,18 @@ export default function Sidebar() {
             </NavLink>
           );
         })}
-      </div>
+      </nav>
 
-      <div className={styles.userArea}>
-        <div className={styles.avatar}>
-          <img
-            src="../../assets/volunteers/vol-joandeson.jpg"
-            alt="UserPhoto"
-          />
-        </div>
+      <div className={styles.desktopFooter}>
+        <div className={styles.userBlock}>
+          <div className={styles.avatar}>J</div>
 
-        <div className={styles.userInfo}>
-          <strong>Joandeson</strong>
-          <span>Administrador</span>
+          <div className={styles.userText}>
+            <strong className={styles.userName}>Joandeson</strong>
+            <span className={styles.userRole}>Administrador</span>
+          </div>
         </div>
       </div>
-    </nav>
+    </aside>
   );
 }

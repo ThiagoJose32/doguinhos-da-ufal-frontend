@@ -1,23 +1,48 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { PawPrint } from "lucide-react";
+import { isAuthenticated, login } from "../../services/authService";
 import styles from "./LoginPage.module.css";
 
 export default function LoginPage() {
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [manterConectado, setManterConectado] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [erro, setErro] = useState("");
 
-  function handleSubmit(event) {
+  useEffect(() => {
+    if (isAuthenticated()) {
+      navigate("/app/animals", { replace: true });
+    }
+  }, [navigate]);
+
+  async function handleSubmit(event) {
     event.preventDefault();
+    setErro("");
+    setLoading(true);
 
-    console.log("Login:", {
-      email,
-      senha,
-      manterConectado,
-    });
+    try {
+      await login({
+        email,
+        senha,
+        remember: manterConectado,
+      });
 
-    alert("Login enviado");
+      navigate("/app/animals", { replace: true });
+    } catch (error) {
+      console.error("Erro no login:", error);
+
+      if (error.response?.status === 401) {
+        setErro("E-mail ou senha inválidos.");
+      } else {
+        setErro("Não foi possível entrar agora. Tente novamente.");
+      }
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -30,6 +55,10 @@ export default function LoginPage() {
 
           <div className={styles.brandText}>
             <h1 className={styles.brandTitle}>Doguinhos da UFAL</h1>
+            <p className={styles.brandSubtitle}>
+              Acesse a área interna para gerenciar animais, voluntários,
+              ocorrências e demais informações do projeto.
+            </p>
           </div>
 
           <Link to="/" className={styles.backLinkDesktop}>
@@ -86,8 +115,10 @@ export default function LoginPage() {
               <span>Manter conectado</span>
             </label>
 
-            <button type="submit" className={styles.button}>
-              Entrar
+            {erro && <p className={styles.errorMessage}>{erro}</p>}
+
+            <button type="submit" className={styles.button} disabled={loading}>
+              {loading ? "Entrando..." : "Entrar"}
             </button>
           </form>
 

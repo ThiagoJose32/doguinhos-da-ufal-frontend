@@ -10,8 +10,20 @@ body,
   min-height: 100%;
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   font-family: Arial, sans-serif;
   background: #f8fafc;
   color: #1f2937;
+
+  /* mantém a rolagem funcionando, mas esconde a barra no Firefox */
+  scrollbar-width: none;
+}
+
+/* esconde a barra no Chrome, Edge e Safari */
+body::-webkit-scrollbar {
+  display: none;
 }

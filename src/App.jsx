@@ -5,7 +5,6 @@ import AppLayout from "./layouts/AppLayout";
 import HomePage from "./pages/Home/HomePage";
 import LoginPage from "./pages/Login/LoginPage";
 import AnimalsPage from "./pages/Animals/AnimalsPage";
-import FinancePage from "./pages/Finance/FinancePage";
 import VolunteersPage from "./pages/Volunteers/VolunteersPage";
 import SettingsPage from "./pages/Settings/SettingsPage";
 import { isAuthenticated } from "./services/authService";
@@ -33,7 +32,6 @@ export default function App() {
         >
           <Route index element={<Navigate to="animals" replace />} />
           <Route path="animals" element={<AnimalsPage />} />
-          <Route path="finance" element={<FinancePage />} />
           <Route path="volunteers" element={<VolunteersPage />} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>

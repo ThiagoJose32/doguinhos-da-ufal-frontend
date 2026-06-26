@@ -1,10 +1,5 @@
 import { NavLink } from "react-router-dom";
-import {
-  CircleDollarSign,
-  PawPrint,
-  Settings,
-  Users,
-} from "lucide-react";
+import { PawPrint, Settings, Users } from "lucide-react";
 import styles from "./Sidebar.module.css";
 
 const menuItems = [
@@ -12,11 +7,6 @@ const menuItems = [
     to: "/app/animals",
     label: "Animais",
     icon: PawPrint,
-  },
-  {
-    to: "/app/finance",
-    label: "Verba",
-    icon: CircleDollarSign,
   },
   {
     to: "/app/volunteers",

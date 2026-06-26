@@ -337,7 +337,7 @@ export default function AnimalModal({
                 </div>
 
                 <div className={styles.field}>
-                  <label className={styles.label}>Cor da pelagem</label>
+                  <label className={styles.label}>Pelagem</label>
                   <select
                     className={styles.select}
                     value={draft.corPelagem}

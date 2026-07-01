@@ -77,13 +77,28 @@
   margin-bottom: 18px;
 }
 
-.profileImage {
+.profileImage,
+.profileFallback {
   width: 72px;
   height: 72px;
   border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.profileImage {
   object-fit: cover;
   border: 3px solid #e8f1fb;
-  flex-shrink: 0;
+}
+
+.profileFallback {
+  background: #e8f1fb;
+  color: #1f6fc2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  font-weight: 800;
+  border: 3px solid #e8f1fb;
 }
 
 .profileMainInfo {

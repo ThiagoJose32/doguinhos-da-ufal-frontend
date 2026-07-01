@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { PawPrint, Settings, Users } from "lucide-react";
+import { getCurrentUser } from "../../services/authService";
 import styles from "./Sidebar.module.css";
 
 const menuItems = [
@@ -21,6 +22,11 @@ const menuItems = [
 ];
 
 export default function Sidebar() {
+  const currentUser = getCurrentUser();
+
+  const initial =
+    currentUser?.nome?.trim()?.charAt(0)?.toUpperCase() || "U";
+
   return (
     <aside className={styles.sidebar}>
       <div className={styles.brand}>
@@ -55,11 +61,23 @@ export default function Sidebar() {
 
       <div className={styles.desktopFooter}>
         <div className={styles.userBlock}>
-          <div className={styles.avatar}>J</div>
+          {currentUser?.fotoUrl ? (
+            <img
+              src={currentUser.fotoUrl}
+              alt={currentUser.nome}
+              className={styles.avatarImage}
+            />
+          ) : (
+            <div className={styles.avatar}>{initial}</div>
+          )}
 
           <div className={styles.userText}>
-            <strong className={styles.userName}>Joandeson</strong>
-            <span className={styles.userRole}>Administrador</span>
+            <strong className={styles.userName}>
+              {currentUser?.nome || "Usuário"}
+            </strong>
+            <span className={styles.userRole}>
+              {currentUser?.perfil || "Sem perfil"}
+            </span>
           </div>
         </div>
       </div>

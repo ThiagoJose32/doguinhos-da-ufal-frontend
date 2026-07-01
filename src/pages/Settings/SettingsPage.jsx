@@ -1,10 +1,30 @@
 import { useNavigate } from "react-router-dom";
-import { CalendarDays, LogOut, Mail, Phone, Shield, UserRound } from "lucide-react";
-import { logout } from "../../services/authService";
+import {
+  CalendarDays,
+  LogOut,
+  Mail,
+  Phone,
+  Shield,
+  UserRound,
+} from "lucide-react";
+import { getCurrentUser, logout } from "../../services/authService";
 import styles from "./SettingsPage.module.css";
+
+function formatDate(dateString) {
+  if (!dateString) return "Não informado";
+
+  const date = new Date(dateString);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Não informado";
+  }
+
+  return date.toLocaleDateString("pt-BR");
+}
 
 export default function SettingsPage() {
   const navigate = useNavigate();
+  const currentUser = getCurrentUser();
 
   function handleLogout() {
     logout();
@@ -12,16 +32,14 @@ export default function SettingsPage() {
   }
 
   const volunteerData = {
-    nome: "Joandeson",
-    perfil: "Administrador",
-    instituicao: "UFAL",
-    email: "joandeson@aluno.ufal.br",
-    telefone: "(82) 99999-9999",
-    ingresso: "15/03/2024",
-    descricao:
-      "Voluntário responsável pelo apoio nas ações do projeto, registro de informações dos animais e acompanhamento das ocorrências.",
-    foto:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=500&q=80",
+    nome: currentUser?.nome || "Não informado",
+    perfil: currentUser?.perfil || "Não informado",
+    email: currentUser?.email || "Não informado",
+    telefone: currentUser?.telefone || "Não informado",
+    ingresso: formatDate(currentUser?.dataIngresso),
+    descricao: currentUser?.descricao || "Sem descrição cadastrada.",
+    foto: currentUser?.fotoUrl || "",
+    curso: currentUser?.curso || "Não informado",
   };
 
   return (
@@ -49,11 +67,17 @@ export default function SettingsPage() {
           </div>
 
           <div className={styles.profileBlock}>
-            <img
-              src={volunteerData.foto}
-              alt={volunteerData.nome}
-              className={styles.profileImage}
-            />
+            {volunteerData.foto ? (
+              <img
+                src={volunteerData.foto}
+                alt={volunteerData.nome}
+                className={styles.profileImage}
+              />
+            ) : (
+              <div className={styles.profileFallback}>
+                {volunteerData.nome.charAt(0).toUpperCase()}
+              </div>
+            )}
 
             <div className={styles.profileMainInfo}>
               <strong className={styles.profileName}>{volunteerData.nome}</strong>
@@ -73,8 +97,8 @@ export default function SettingsPage() {
             </div>
 
             <div className={styles.infoRow}>
-              <span className={styles.infoLabel}>Instituição</span>
-              <span className={styles.infoValue}>{volunteerData.instituicao}</span>
+              <span className={styles.infoLabel}>Curso</span>
+              <span className={styles.infoValue}>{volunteerData.curso}</span>
             </div>
 
             <div className={styles.infoRow}>

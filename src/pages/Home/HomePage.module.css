@@ -1,0 +1,567 @@
+.page {
+  --green: #5ce28b;
+  --green-dark: #3ec96f;
+  --gray-section: #e9ecef;
+  --footer-bg: #6b7280;
+
+  width: 100%;
+  background: #ffffff;
+  color: #1f2937;
+}
+
+/* ---------- Cabeçalho ---------- */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--green);
+}
+
+.headerInner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.brand img {
+  height: 48px;
+  width: auto;
+  display: block;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+}
+
+.nav a {
+  color: #0f172a;
+  font-size: 0.98rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.nav a:hover {
+  opacity: 0.65;
+}
+
+/* ---------- Hero ---------- */
+.hero {
+  width: 100%;
+  height: 420px;
+  overflow: hidden;
+}
+
+.hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.heroSlider {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.heroSlide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+
+.heroSlideActive {
+  opacity: 1;
+}
+
+/* ---------- Seções genéricas ---------- */
+.section {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 64px 32px 32px;
+}
+
+.sectionTitle {
+  position: relative;
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 6px;
+  width: 100%;
+  justify-content: center;
+  margin: 0 0 48px;
+  font-size: 1.9rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #111827;
+  text-align: center;
+}
+
+.sectionTitlePaw {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  transform: translateY(-4px);
+}
+
+/* ---------- Visão do projeto ---------- */
+.visionGrid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 56px;
+  align-items: center;
+}
+
+.visionImage {
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #d9d9d9;
+  justify-self: center;
+}
+
+.visionImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.visionText {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.75;
+  color: #1f2937;
+}
+
+/* ---------- Torne-se um voluntário ---------- */
+.volunteerSection {
+  background: var(--gray-section);
+  padding: 64px 32px;
+}
+
+.volunteerSection .sectionTitle {
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.volunteerGrid {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+}
+
+.volunteerCardTitle {
+  margin: 0 0 16px;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #111827;
+  text-align: center;
+}
+
+.volunteerList {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.volunteerList li {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: #374151;
+}
+
+.chartCard {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 220px;
+}
+
+.chartTitle {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #111827;
+  text-align: center;
+}
+
+.chart {
+  width: 100%;
+  height: auto;
+}
+
+.volunteerButtonWrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 48px;
+}
+
+.volunteerButton {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.volunteerButton img {
+  height: 34px;
+  width: auto;
+  display: block;
+  border-radius: 8px;
+}
+
+.volunteerButton:hover {
+  filter: brightness(0.95);
+}
+
+.volunteerButton:active {
+  transform: translateY(1px);
+}
+
+/* ---------- Nossa equipe ---------- */
+.teamGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+.teamCard {
+  background: #f1f3f5;
+  border-radius: 4px;
+  overflow: hidden;
+  padding-bottom: 18px;
+}
+
+.teamPhoto {
+  width: 100%;
+  height: 150px;
+  background: #4da8e0;
+  overflow: hidden;
+}
+
+.teamPhoto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.teamName {
+  margin: 14px 16px 8px;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #111827;
+  text-align: center;
+}
+
+.teamText {
+  margin: 0 16px;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: #4b5563;
+}
+
+/* ---------- Nossos serviços ---------- */
+.carousel {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.carouselRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.carouselViewport {
+  overflow: hidden;
+  flex: 1;
+}
+
+.carouselTrack {
+  display: flex;
+  transition: transform 0.45s ease;
+}
+
+.carouselItem {
+  flex: 0 0 calc(100% / 3);
+  box-sizing: border-box;
+  padding: 0 6px;
+}
+
+.serviceCard {
+  position: relative;
+  height: 220px;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.serviceCard img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.serviceLabel {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  padding: 4px 10px;
+  background: rgba(17, 24, 39, 0.78);
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+}
+
+.carouselArrow {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: #111827;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.carouselArrow:hover {
+  background: #f3f4f6;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.carouselDots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.carouselDot {
+  width: 9px;
+  height: 9px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: #d1d5db;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.carouselDotActive {
+  background: #2563eb;
+  transform: scale(1.2);
+}
+
+/* ---------- Rodapé ---------- */
+.footer {
+  background: var(--footer-bg);
+  color: #ffffff;
+  margin-top: 72px;
+  padding: 48px 32px;
+}
+
+.footerInner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 48px;
+  align-items: center;
+}
+
+.footerLogo {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: #d9d9d9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.footerLogo img {
+  width: 62%;
+  height: auto;
+  object-fit: contain;
+}
+
+.footerContent {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.footerNav {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.footerNav a {
+  color: #ffffff;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.footerNav a:hover {
+  opacity: 0.75;
+}
+
+.footerBottom {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+}
+
+.footerLabel {
+  display: block;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  margin-bottom: 14px;
+}
+
+.contactIcons {
+  display: flex;
+  gap: 14px;
+}
+
+.contactIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #d9d9d9;
+  color: #4b5563;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.contactIcon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.contactIcon:hover {
+  background: #ffffff;
+  color: #111827;
+  transform: translateY(-2px);
+}
+
+.footerPartners {
+  text-align: right;
+}
+
+.partnersLogo img {
+  height: 56px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* ---------- Responsivo ---------- */
+@media (max-width: 900px) {
+  .headerInner {
+    padding: 14px 20px;
+  }
+
+  .nav {
+    gap: 20px;
+  }
+
+  .visionGrid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .volunteerGrid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .teamGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .carouselItem {
+    padding: 0 4px;
+  }
+
+  .serviceCard {
+    height: 180px;
+  }
+
+  .footerInner {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .footerBottom {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .footerPartners {
+    text-align: center;
+  }
+}
+
+@media (max-width: 560px) {
+  .hero {
+    height: 260px;
+  }
+
+  .sectionTitle {
+    font-size: 1.4rem;
+  }
+
+  .nav a {
+    font-size: 0.85rem;
+  }
+
+  .serviceLabel {
+    font-size: 0.72rem;
+    padding: 3px 8px;
+  }
+}

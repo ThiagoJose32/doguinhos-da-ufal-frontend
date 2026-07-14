@@ -1,34 +1,49 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Funnel } from "lucide-react";
+
 import PageHeader from "../../components/PageHeader/PageHeader";
 import EntityCard from "../../components/EntityCard/EntityCard";
 import AnimalModal from "../../components/AnimalModal/AnimalModal";
-import mockAnimals from "../../data/mockAnimals";
+
+import {
+  ANIMAL_STATUS_OPTIONS,
+  createAnimal,
+  deleteAnimal,
+  downloadAdoptionTerm,
+  getAnimalById,
+  listAnimals,
+  updateAnimal,
+} from "../../services/animalService";
+
 import styles from "../../styles/GridPage.module.css";
 
-const statusOptions = ["No campus", "Adotado", "Desaparecido", "Óbito"];
+function getErrorMessage(error) {
+  const responseData = error?.response?.data;
 
-function buildAnimalWithExtraData(animal) {
-  return {
-    ...animal,
-    dataEstimadaNascimento: "",
-    descricao: "",
-    corPelagem: "Caramelo",
-    porte: "Médio",
-    castrado: "Não",
-    adotanteNome: "",
-    termoAdocaoArquivoNome: "",
-    termoAdocaoArquivoUrl: "",
-  };
+  if (typeof responseData === "string") {
+    return responseData;
+  }
+
+  return (
+    responseData?.message ||
+    responseData?.detail ||
+    error?.message ||
+    "Não foi possível concluir a operação."
+  );
 }
 
 export default function AnimalsPage() {
-  const [animals, setAnimals] = useState(
-    mockAnimals.map((animal) => buildAnimalWithExtraData(animal))
-  );
+  const [animals, setAnimals] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [openingAnimalId, setOpeningAnimalId] = useState(null);
+  const [pageError, setPageError] = useState("");
 
   const [animalType, setAnimalType] = useState("dog");
-  const [selectedStatuses, setSelectedStatuses] = useState([...statusOptions]);
+
+  const [selectedStatuses, setSelectedStatuses] = useState([
+    ...ANIMAL_STATUS_OPTIONS,
+  ]);
+
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const [modalConfig, setModalConfig] = useState({
@@ -36,6 +51,37 @@ export default function AnimalsPage() {
     mode: "view",
     animal: null,
   });
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadAnimals() {
+      setLoading(true);
+      setPageError("");
+
+      try {
+        const animalsFromApi = await listAnimals();
+
+        if (active) {
+          setAnimals(animalsFromApi);
+        }
+      } catch (error) {
+        if (active) {
+          setPageError(getErrorMessage(error));
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadAnimals();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   function handleNewItem() {
     setModalConfig({
@@ -45,12 +91,29 @@ export default function AnimalsPage() {
     });
   }
 
-  function handleOpenAnimal(animal) {
-    setModalConfig({
-      isOpen: true,
-      mode: "view",
-      animal,
-    });
+  async function handleOpenAnimal(animal) {
+    if (!animal?.id || openingAnimalId) {
+      return;
+    }
+
+    setOpeningAnimalId(animal.id);
+    setPageError("");
+
+    try {
+      const detailedAnimal = await getAnimalById(animal.id);
+
+      setModalConfig({
+        isOpen: true,
+        mode: "view",
+        animal: detailedAnimal,
+      });
+    } catch (error) {
+      setPageError(
+        `Não foi possível abrir o animal. ${getErrorMessage(error)}`
+      );
+    } finally {
+      setOpeningAnimalId(null);
+    }
   }
 
   function handleCloseModal() {
@@ -61,53 +124,101 @@ export default function AnimalsPage() {
     });
   }
 
-  function handleSaveAnimal(payload, mode) {
+  async function handleSaveAnimal(payload, mode) {
     if (mode === "create") {
-      const newAnimal = {
-        ...payload,
-        id: Date.now(),
-      };
+      const createdAnimal = await createAnimal(payload);
 
-      setAnimals((prev) => [newAnimal, ...prev]);
+      setAnimals((currentAnimals) => [
+        createdAnimal,
+        ...currentAnimals,
+      ]);
+
       handleCloseModal();
-      return;
+
+      return createdAnimal;
     }
 
     if (mode === "edit") {
-      setAnimals((prev) =>
-        prev.map((animal) => (animal.id === payload.id ? payload : animal))
+      const updatedAnimal = await updateAnimal(
+        payload.id,
+        payload
       );
 
-      setModalConfig((prev) => ({
-        ...prev,
-        animal: payload,
-      }));
+      setAnimals((currentAnimals) =>
+        currentAnimals.map((animal) =>
+          animal.id === updatedAnimal.id
+            ? updatedAnimal
+            : animal
+        )
+      );
+
+      setModalConfig({
+        isOpen: true,
+        mode: "view",
+        animal: updatedAnimal,
+      });
+
+      return updatedAnimal;
     }
+
+    return payload;
+  }
+
+  async function handleDeleteAnimal(animal) {
+    await deleteAnimal(animal.id);
+
+    setAnimals((currentAnimals) =>
+      currentAnimals.filter(
+        (currentAnimal) =>
+          currentAnimal.id !== animal.id
+      )
+    );
+
+    handleCloseModal();
+  }
+
+  async function handleOpenAdoptionTerm(animal) {
+    await downloadAdoptionTerm(animal);
   }
 
   function toggleStatus(status) {
-    setSelectedStatuses((prev) =>
-      prev.includes(status)
-        ? prev.filter((item) => item !== status)
-        : [...prev, status]
+    setSelectedStatuses((currentStatuses) =>
+      currentStatuses.includes(status)
+        ? currentStatuses.filter(
+            (currentStatus) =>
+              currentStatus !== status
+          )
+        : [...currentStatuses, status]
     );
   }
 
   function toggleAllStatuses() {
-    const allSelected = selectedStatuses.length === statusOptions.length;
-    setSelectedStatuses(allSelected ? [] : [...statusOptions]);
+    const allSelected =
+      selectedStatuses.length ===
+      ANIMAL_STATUS_OPTIONS.length;
+
+    setSelectedStatuses(
+      allSelected
+        ? []
+        : [...ANIMAL_STATUS_OPTIONS]
+    );
   }
 
   const filteredAnimals = useMemo(() => {
     return animals.filter((animal) => {
-      const matchesType = animal.especie === animalType;
-      const matchesStatus = selectedStatuses.includes(animal.status);
+      const matchesType =
+        animal.especie === animalType;
+
+      const matchesStatus =
+        selectedStatuses.includes(animal.status);
 
       return matchesType && matchesStatus;
     });
   }, [animals, animalType, selectedStatuses]);
 
-  const allStatusesSelected = selectedStatuses.length === statusOptions.length;
+  const allStatusesSelected =
+    selectedStatuses.length ===
+    ANIMAL_STATUS_OPTIONS.length;
 
   return (
     <>
@@ -123,7 +234,9 @@ export default function AnimalsPage() {
             <button
               type="button"
               className={`${styles.tabButton} ${
-                animalType === "dog" ? styles.activeTab : ""
+                animalType === "dog"
+                  ? styles.activeTab
+                  : ""
               }`}
               onClick={() => setAnimalType("dog")}
             >
@@ -133,7 +246,9 @@ export default function AnimalsPage() {
             <button
               type="button"
               className={`${styles.tabButton} ${
-                animalType === "cat" ? styles.activeTab : ""
+                animalType === "cat"
+                  ? styles.activeTab
+                  : ""
               }`}
               onClick={() => setAnimalType("cat")}
             >
@@ -145,10 +260,15 @@ export default function AnimalsPage() {
             <button
               type="button"
               className={styles.filterButton}
-              onClick={() => setIsFilterOpen((prev) => !prev)}
+              onClick={() =>
+                setIsFilterOpen((current) => !current)
+              }
             >
               <Funnel size={18} />
-              <span className={styles.filterButtonText}>Filtros</span>
+
+              <span className={styles.filterButtonText}>
+                Filtros
+              </span>
             </button>
 
             {isFilterOpen && (
@@ -158,43 +278,81 @@ export default function AnimalsPage() {
                   className={styles.filterOption}
                   onClick={toggleAllStatuses}
                 >
-                  <input type="checkbox" checked={allStatusesSelected} readOnly />
+                  <input
+                    type="checkbox"
+                    checked={allStatusesSelected}
+                    readOnly
+                  />
+
                   <span>Todos</span>
                 </button>
 
-                {statusOptions.map((status) => (
-                  <button
-                    key={status}
-                    type="button"
-                    className={styles.filterOption}
-                    onClick={() => toggleStatus(status)}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedStatuses.includes(status)}
-                      readOnly
-                    />
-                    <span>{status}</span>
-                  </button>
-                ))}
+                {ANIMAL_STATUS_OPTIONS.map(
+                  (status) => (
+                    <button
+                      key={status}
+                      type="button"
+                      className={styles.filterOption}
+                      onClick={() =>
+                        toggleStatus(status)
+                      }
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedStatuses.includes(
+                          status
+                        )}
+                        readOnly
+                      />
+
+                      <span>{status}</span>
+                    </button>
+                  )
+                )}
               </div>
             )}
           </div>
         </div>
 
         <div className={styles.content}>
-          <div className={styles.cardsArea}>
-            {filteredAnimals.map((animal) => (
-              <EntityCard
-                key={animal.id}
-                image={animal.imagem}
-                title={animal.nome}
-                subtitle={`${animal.sexo} - ${animal.status}`}
-                status={animal.status}
-                onClick={() => handleOpenAnimal(animal)}
-              />
-            ))}
-          </div>
+          {loading && (
+            <p>Carregando animais...</p>
+          )}
+
+          {!loading && pageError && (
+            <p>{pageError}</p>
+          )}
+
+          {!loading &&
+            !pageError &&
+            filteredAnimals.length === 0 && (
+              <p>
+                Nenhum animal encontrado para os
+                filtros selecionados.
+              </p>
+            )}
+
+          {!loading &&
+            filteredAnimals.length > 0 && (
+              <div className={styles.cardsArea}>
+                {filteredAnimals.map((animal) => (
+                  <EntityCard
+                    key={animal.id}
+                    image={animal.imagem}
+                    title={animal.nome}
+                    subtitle={
+                      openingAnimalId === animal.id
+                        ? "Carregando informações..."
+                        : `${animal.sexo} - ${animal.idade}`
+                    }
+                    status={animal.status}
+                    onClick={() =>
+                      handleOpenAnimal(animal)
+                    }
+                  />
+                ))}
+              </div>
+            )}
         </div>
       </section>
 
@@ -204,6 +362,10 @@ export default function AnimalsPage() {
         animal={modalConfig.animal}
         onClose={handleCloseModal}
         onSave={handleSaveAnimal}
+        onDelete={handleDeleteAnimal}
+        onOpenAdoptionTerm={
+          handleOpenAdoptionTerm
+        }
       />
     </>
   );

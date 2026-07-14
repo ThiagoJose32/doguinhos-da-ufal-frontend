@@ -5,45 +5,105 @@ function getStatusClass(status) {
   switch (status) {
     case "No campus":
       return styles.statusNoCampus;
+
+    case "Em tratamento":
+      return styles.statusEmTratamento;
+
+    case "Disponível para adoção":
+      return styles.statusDisponivelAdocao;
+
     case "Adotado":
       return styles.statusAdotado;
+
     case "Desaparecido":
       return styles.statusDesaparecido;
+
     case "Óbito":
       return styles.statusObito;
+
     case "Ativo":
       return styles.statusAtivo;
+
     case "Inativo":
       return styles.statusInativo;
+
     default:
       return "";
   }
 }
 
-export default function EntityCard({ image, title, subtitle, status, to }) {
+export default function EntityCard({
+  image,
+  title,
+  subtitle,
+  status,
+  to,
+  onClick,
+}) {
   const className = `${styles.card} ${getStatusClass(status)}`;
 
   const content = (
     <>
-      <img src={image} alt={title} className={styles.cardImage} />
+      {image ? (
+        <img
+          src={image}
+          alt={title}
+          className={styles.cardImage}
+        />
+      ) : (
+        <div className={styles.cardImage} aria-label="Sem imagem" />
+      )}
 
       <div className={styles.overlay}>
         <h3 className={styles.cardTitle}>{title}</h3>
 
-        {subtitle && <p className={styles.cardSubtitle}>{subtitle}</p>}
+        {subtitle && (
+          <p className={styles.cardSubtitle}>
+            {subtitle}
+          </p>
+        )}
 
-        {status && <span className={styles.statusBadge}>{status}</span>}
+        {status && (
+          <span className={styles.statusBadge}>
+            {status}
+          </span>
+        )}
       </div>
     </>
   );
 
   if (to) {
     return (
-      <Link to={to} className={className}>
+      <Link
+        to={to}
+        className={className}
+      >
         {content}
       </Link>
     );
   }
 
-  return <article className={className}>{content}</article>;
+  function handleKeyDown(event) {
+    if (!onClick) {
+      return;
+    }
+
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      onClick();
+    }
+  }
+
+  return (
+    <article
+      className={className}
+      onClick={onClick}
+      onKeyDown={handleKeyDown}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      style={onClick ? { cursor: "pointer" } : undefined}
+    >
+      {content}
+    </article>
+  );
 }

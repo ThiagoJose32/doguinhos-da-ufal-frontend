@@ -68,8 +68,7 @@ function formatDateTime(value) {
 function formatProfile(profile) {
   const profileOption =
     USER_PROFILE_OPTIONS.find(
-      (option) =>
-        option.value === profile
+      (option) => option.value === profile
     );
 
   if (profileOption) {
@@ -83,10 +82,8 @@ function formatProfile(profile) {
   return profile
     .toLowerCase()
     .replaceAll("_", " ")
-    .replace(
-      /(^|\s)\S/g,
-      (letter) =>
-        letter.toUpperCase()
+    .replace(/(^|\s)\S/g, (letter) =>
+      letter.toUpperCase()
     );
 }
 
@@ -100,31 +97,25 @@ function getInitialForm(user, mode) {
   return {
     nome: user?.nome || "",
     email: user?.email || "",
-    perfil:
-      user?.perfil || "VOLUNTARIO",
+    perfil: user?.perfil || "VOLUNTARIO",
     ativo:
-      typeof user?.ativo ===
-      "boolean"
+      typeof user?.ativo === "boolean"
         ? user.ativo
         : true,
-    descricao:
-      user?.descricao || "",
-    telefone:
-      user?.telefone || "",
+    descricao: user?.descricao || "",
+    telefone: user?.telefone || "",
     dataIngresso: toDateInputValue(
       user?.dataIngresso
     ),
     curso: user?.curso || "",
     senha: "",
     confirmarSenha: "",
-    dataCriacao:
-      user?.dataCriacao || "",
+    dataCriacao: user?.dataCriacao || "",
   };
 }
 
 function getErrorMessage(error) {
-  const responseData =
-    error.response?.data;
+  const responseData = error.response?.data;
 
   if (error.response?.status === 403) {
     return "Você não possui permissão para realizar esta operação.";
@@ -134,9 +125,7 @@ function getErrorMessage(error) {
     return "Já existe um usuário cadastrado com esse e-mail.";
   }
 
-  if (
-    typeof responseData === "string"
-  ) {
+  if (typeof responseData === "string") {
     return responseData;
   }
 
@@ -148,11 +137,7 @@ function getErrorMessage(error) {
     return responseData.detail;
   }
 
-  if (
-    Array.isArray(
-      responseData?.errors
-    )
-  ) {
+  if (Array.isArray(responseData?.errors)) {
     return responseData.errors
       .map(
         (item) =>
@@ -165,20 +150,15 @@ function getErrorMessage(error) {
 
   if (
     responseData &&
-    typeof responseData ===
-      "object"
+    typeof responseData === "object"
   ) {
-    const fieldMessages =
-      Object.values(
-        responseData
-      ).filter(
-        (value) =>
-          typeof value === "string"
-      );
+    const fieldMessages = Object.values(
+      responseData
+    ).filter(
+      (value) => typeof value === "string"
+    );
 
-    if (
-      fieldMessages.length > 0
-    ) {
+    if (fieldMessages.length > 0) {
       return fieldMessages.join(" ");
     }
   }
@@ -192,10 +172,8 @@ function getModalContent(mode) {
       title: "Novo voluntário",
       subtitle:
         "Cadastre um novo usuário para acessar o sistema.",
-      saveLabel:
-        "Cadastrar voluntário",
-      savingLabel:
-        "Cadastrando...",
+      saveLabel: "Cadastrar voluntário",
+      savingLabel: "Cadastrando...",
     };
   }
 
@@ -204,15 +182,13 @@ function getModalContent(mode) {
       title: "Editar voluntário",
       subtitle:
         "Atualize as informações do usuário.",
-      saveLabel:
-        "Salvar alterações",
+      saveLabel: "Salvar alterações",
       savingLabel: "Salvando...",
     };
   }
 
   return {
-    title:
-      "Detalhes do voluntário",
+    title: "Detalhes do voluntário",
     subtitle:
       "Consulte as informações cadastradas para este usuário.",
     saveLabel: "",
@@ -226,6 +202,7 @@ export default function UserModal({
   user = null,
   lockAccessFields = false,
   canDelete = true,
+  canManagePassword = false,
   titleOverride,
   subtitleOverride,
   saveAction,
@@ -264,14 +241,14 @@ export default function UserModal({
   const [error, setError] =
     useState("");
 
-  const isViewMode =
-    mode === "view";
+  const isViewMode = mode === "view";
+  const isCreateMode = mode === "create";
+  const isEditMode = mode === "edit";
+  const isBusy = saving || deleting;
 
-  const isCreateMode =
-    mode === "create";
-
-  const isBusy =
-    saving || deleting;
+  const showPasswordFields =
+    isCreateMode ||
+    (isEditMode && canManagePassword);
 
   const modalContent =
     getModalContent(mode);
@@ -289,9 +266,7 @@ export default function UserModal({
       return;
     }
 
-    if (
-      objectUrlRef.current
-    ) {
+    if (objectUrlRef.current) {
       URL.revokeObjectURL(
         objectUrlRef.current
       );
@@ -300,10 +275,7 @@ export default function UserModal({
     }
 
     setForm(
-      getInitialForm(
-        user,
-        mode
-      )
+      getInitialForm(user, mode)
     );
 
     setFotoArquivo(null);
@@ -350,17 +322,11 @@ export default function UserModal({
         handleEscape
       );
     };
-  }, [
-    open,
-    isBusy,
-    onClose,
-  ]);
+  }, [open, isBusy, onClose]);
 
   useEffect(() => {
     return () => {
-      if (
-        objectUrlRef.current
-      ) {
+      if (objectUrlRef.current) {
         URL.revokeObjectURL(
           objectUrlRef.current
         );
@@ -372,10 +338,7 @@ export default function UserModal({
     return null;
   }
 
-  if (
-    !isCreateMode &&
-    !user
-  ) {
+  if (!isCreateMode && !user) {
     return null;
   }
 
@@ -385,9 +348,7 @@ export default function UserModal({
       .charAt(0)
       .toUpperCase() || "U";
 
-  function handleFieldChange(
-    event
-  ) {
+  function handleFieldChange(event) {
     const {
       name,
       value,
@@ -395,20 +356,16 @@ export default function UserModal({
       checked,
     } = event.target;
 
-    setForm(
-      (currentForm) => ({
-        ...currentForm,
-        [name]:
-          type === "checkbox"
-            ? checked
-            : value,
-      })
-    );
+    setForm((currentForm) => ({
+      ...currentForm,
+      [name]:
+        type === "checkbox"
+          ? checked
+          : value,
+    }));
   }
 
-  function handlePhotoChange(
-    event
-  ) {
+  function handlePhotoChange(event) {
     const file =
       event.target.files?.[0];
 
@@ -417,9 +374,7 @@ export default function UserModal({
     }
 
     if (
-      !file.type.startsWith(
-        "image/"
-      )
+      !file.type.startsWith("image/")
     ) {
       setError(
         "Selecione um arquivo de imagem válido."
@@ -429,9 +384,7 @@ export default function UserModal({
       return;
     }
 
-    if (
-      objectUrlRef.current
-    ) {
+    if (objectUrlRef.current) {
       URL.revokeObjectURL(
         objectUrlRef.current
       );
@@ -450,9 +403,7 @@ export default function UserModal({
   }
 
   function cancelNewPhoto() {
-    if (
-      objectUrlRef.current
-    ) {
+    if (objectUrlRef.current) {
       URL.revokeObjectURL(
         objectUrlRef.current
       );
@@ -490,6 +441,7 @@ export default function UserModal({
     }
 
     if (
+      showPasswordFields &&
       form.senha &&
       form.senha.length < 6
     ) {
@@ -497,8 +449,9 @@ export default function UserModal({
     }
 
     if (
+      showPasswordFields &&
       form.senha !==
-      form.confirmarSenha
+        form.confirmarSenha
     ) {
       return "A senha e a confirmação não coincidem.";
     }
@@ -506,9 +459,7 @@ export default function UserModal({
     return "";
   }
 
-  async function handleSubmit(
-    event
-  ) {
+  async function handleSubmit(event) {
     event.preventDefault();
     setError("");
 
@@ -528,14 +479,14 @@ export default function UserModal({
         email: form.email,
         perfil: form.perfil,
         ativo: form.ativo,
-        descricao:
-          form.descricao,
-        telefone:
-          form.telefone,
+        descricao: form.descricao,
+        telefone: form.telefone,
         dataIngresso:
           form.dataIngresso,
         curso: form.curso,
-        senha: form.senha,
+        senha: showPasswordFields
+          ? form.senha
+          : "",
       };
 
       let savedUser;
@@ -606,9 +557,7 @@ export default function UserModal({
     setError("");
 
     try {
-      await deleteUser(
-        user.id
-      );
+      await deleteUser(user.id);
 
       onDeleted?.(user);
     } catch (deleteError) {
@@ -774,9 +723,7 @@ export default function UserModal({
                         styles.photoButton
                       }
                     >
-                      <Camera
-                        size={17}
-                      />
+                      <Camera size={17} />
 
                       <span>
                         Selecionar foto
@@ -805,12 +752,9 @@ export default function UserModal({
                         onClick={
                           cancelNewPhoto
                         }
-                        disabled={
-                          isBusy
-                        }
+                        disabled={isBusy}
                       >
-                        Cancelar nova
-                        foto
+                        Cancelar nova foto
                       </button>
                     )}
 
@@ -819,10 +763,9 @@ export default function UserModal({
                         styles.photoHint
                       }
                     >
-                      Selecione uma
-                      imagem JPG, PNG
-                      ou outro formato
-                      de imagem.
+                      Selecione uma imagem
+                      JPG, PNG ou outro
+                      formato de imagem.
                     </span>
                   </>
                 )}
@@ -834,16 +777,10 @@ export default function UserModal({
                 styles.fieldsGrid
               }
             >
-              <div
-                className={
-                  styles.field
-                }
-              >
+              <div className={styles.field}>
                 <label
                   htmlFor="user-name"
-                  className={
-                    styles.label
-                  }
+                  className={styles.label}
                 >
                   Nome
                 </label>
@@ -852,9 +789,7 @@ export default function UserModal({
                   id="user-name"
                   name="nome"
                   type="text"
-                  className={
-                    styles.input
-                  }
+                  className={styles.input}
                   value={form.nome}
                   onChange={
                     handleFieldChange
@@ -868,16 +803,10 @@ export default function UserModal({
                 />
               </div>
 
-              <div
-                className={
-                  styles.field
-                }
-              >
+              <div className={styles.field}>
                 <label
                   htmlFor="user-email"
-                  className={
-                    styles.label
-                  }
+                  className={styles.label}
                 >
                   E-mail
                 </label>
@@ -886,9 +815,7 @@ export default function UserModal({
                   id="user-email"
                   name="email"
                   type="email"
-                  className={`${
-                    styles.input
-                  } ${
+                  className={`${styles.input} ${
                     isViewMode ||
                     lockAccessFields
                       ? styles.readOnlyInput
@@ -914,23 +841,16 @@ export default function UserModal({
                         styles.fieldHint
                       }
                     >
-                      O e-mail não
-                      pode ser alterado
-                      nesta tela.
+                      O e-mail não pode ser
+                      alterado nesta tela.
                     </span>
                   )}
               </div>
 
-              <div
-                className={
-                  styles.field
-                }
-              >
+              <div className={styles.field}>
                 <label
                   htmlFor="user-profile"
-                  className={
-                    styles.label
-                  }
+                  className={styles.label}
                 >
                   Perfil
                 </label>
@@ -938,9 +858,7 @@ export default function UserModal({
                 <select
                   id="user-profile"
                   name="perfil"
-                  className={`${
-                    styles.input
-                  } ${
+                  className={`${styles.input} ${
                     isViewMode ||
                     lockAccessFields
                       ? styles.readOnlyInput
@@ -967,9 +885,7 @@ export default function UserModal({
                           option.value
                         }
                       >
-                        {
-                          option.label
-                        }
+                        {option.label}
                       </option>
                     )
                   )}
@@ -978,15 +894,11 @@ export default function UserModal({
 
               {!isCreateMode && (
                 <div
-                  className={
-                    styles.field
-                  }
+                  className={styles.field}
                 >
                   <label
                     htmlFor="user-status"
-                    className={
-                      styles.label
-                    }
+                    className={styles.label}
                   >
                     Status
                   </label>
@@ -994,9 +906,7 @@ export default function UserModal({
                   <select
                     id="user-status"
                     name="ativo"
-                    className={`${
-                      styles.input
-                    } ${
+                    className={`${styles.input} ${
                       isViewMode ||
                       lockAccessFields
                         ? styles.readOnlyInput
@@ -1007,17 +917,12 @@ export default function UserModal({
                         ? "true"
                         : "false"
                     }
-                    onChange={(
-                      event
-                    ) => {
+                    onChange={(event) => {
                       setForm(
-                        (
-                          currentForm
-                        ) => ({
+                        (currentForm) => ({
                           ...currentForm,
                           ativo:
-                            event
-                              .target
+                            event.target
                               .value ===
                             "true",
                         })
@@ -1040,16 +945,10 @@ export default function UserModal({
                 </div>
               )}
 
-              <div
-                className={
-                  styles.field
-                }
-              >
+              <div className={styles.field}>
                 <label
                   htmlFor="user-course"
-                  className={
-                    styles.label
-                  }
+                  className={styles.label}
                 >
                   Curso
                 </label>
@@ -1058,9 +957,7 @@ export default function UserModal({
                   id="user-course"
                   name="curso"
                   type="text"
-                  className={
-                    styles.input
-                  }
+                  className={styles.input}
                   value={form.curso}
                   onChange={
                     handleFieldChange
@@ -1074,16 +971,10 @@ export default function UserModal({
                 />
               </div>
 
-              <div
-                className={
-                  styles.field
-                }
-              >
+              <div className={styles.field}>
                 <label
                   htmlFor="user-phone"
-                  className={
-                    styles.label
-                  }
+                  className={styles.label}
                 >
                   Telefone
                 </label>
@@ -1092,12 +983,8 @@ export default function UserModal({
                   id="user-phone"
                   name="telefone"
                   type="tel"
-                  className={
-                    styles.input
-                  }
-                  value={
-                    form.telefone
-                  }
+                  className={styles.input}
+                  value={form.telefone}
                   onChange={
                     handleFieldChange
                   }
@@ -1110,16 +997,10 @@ export default function UserModal({
                 />
               </div>
 
-              <div
-                className={
-                  styles.field
-                }
-              >
+              <div className={styles.field}>
                 <label
                   htmlFor="user-entry-date"
-                  className={
-                    styles.label
-                  }
+                  className={styles.label}
                 >
                   Ingresso no projeto
                 </label>
@@ -1128,9 +1009,7 @@ export default function UserModal({
                   id="user-entry-date"
                   name="dataIngresso"
                   type="date"
-                  className={
-                    styles.input
-                  }
+                  className={styles.input}
                   value={
                     form.dataIngresso
                   }
@@ -1146,25 +1025,17 @@ export default function UserModal({
 
               {isViewMode && (
                 <div
-                  className={
-                    styles.field
-                  }
+                  className={styles.field}
                 >
                   <label
-                    className={
-                      styles.label
-                    }
+                    className={styles.label}
                   >
                     Data de criação
                   </label>
 
                   <input
                     type="text"
-                    className={`${
-                      styles.input
-                    } ${
-                      styles.readOnlyInput
-                    }`}
+                    className={`${styles.input} ${styles.readOnlyInput}`}
                     value={formatDateTime(
                       form.dataCriacao
                     )}
@@ -1174,17 +1045,11 @@ export default function UserModal({
               )}
 
               <div
-                className={`${
-                  styles.field
-                } ${
-                  styles.fullWidth
-                }`}
+                className={`${styles.field} ${styles.fullWidth}`}
               >
                 <label
                   htmlFor="user-description"
-                  className={
-                    styles.label
-                  }
+                  className={styles.label}
                 >
                   Descrição
                 </label>
@@ -1192,12 +1057,8 @@ export default function UserModal({
                 <textarea
                   id="user-description"
                   name="descricao"
-                  className={
-                    styles.textarea
-                  }
-                  value={
-                    form.descricao
-                  }
+                  className={styles.textarea}
+                  value={form.descricao}
                   onChange={
                     handleFieldChange
                   }
@@ -1211,7 +1072,7 @@ export default function UserModal({
               </div>
             </div>
 
-            {!isViewMode && (
+            {showPasswordFields && (
               <div
                 className={
                   styles.passwordSection
@@ -1222,14 +1083,12 @@ export default function UserModal({
                     styles.sectionTitle
                   }
                 >
-                  <KeyRound
-                    size={18}
-                  />
+                  <KeyRound size={18} />
 
                   <span>
                     {isCreateMode
                       ? "Senha de acesso"
-                      : "Alterar senha"}
+                      : "Alterar senha do usuário"}
                   </span>
                 </div>
 
@@ -1240,7 +1099,7 @@ export default function UserModal({
                 >
                   {isCreateMode
                     ? "A senha será utilizada pelo voluntário para acessar o sistema."
-                    : "Deixe os campos vazios para manter a senha atual."}
+                    : "Deixe os campos vazios para manter a senha atual do usuário."}
                 </p>
 
                 <div
@@ -1249,9 +1108,7 @@ export default function UserModal({
                   }
                 >
                   <div
-                    className={
-                      styles.field
-                    }
+                    className={styles.field}
                   >
                     <label
                       htmlFor="user-password"
@@ -1271,28 +1128,20 @@ export default function UserModal({
                       className={
                         styles.input
                       }
-                      value={
-                        form.senha
-                      }
+                      value={form.senha}
                       onChange={
                         handleFieldChange
                       }
                       minLength={6}
                       maxLength={255}
-                      required={
-                        isCreateMode
-                      }
+                      required={isCreateMode}
                       autoComplete="new-password"
-                      disabled={
-                        isBusy
-                      }
+                      disabled={isBusy}
                     />
                   </div>
 
                   <div
-                    className={
-                      styles.field
-                    }
+                    className={styles.field}
                   >
                     <label
                       htmlFor="user-password-confirmation"
@@ -1318,13 +1167,9 @@ export default function UserModal({
                       }
                       minLength={6}
                       maxLength={255}
-                      required={
-                        isCreateMode
-                      }
+                      required={isCreateMode}
                       autoComplete="new-password"
-                      disabled={
-                        isBusy
-                      }
+                      disabled={isBusy}
                     />
                   </div>
                 </div>
@@ -1364,13 +1209,9 @@ export default function UserModal({
                       onClick={
                         handleDelete
                       }
-                      disabled={
-                        isBusy
-                      }
+                      disabled={isBusy}
                     >
-                      <Trash2
-                        size={18}
-                      />
+                      <Trash2 size={18} />
 
                       <span>
                         {deleting
@@ -1406,23 +1247,14 @@ export default function UserModal({
                     onClick={onEdit}
                     disabled={isBusy}
                   >
-                    <Pencil
-                      size={18}
-                    />
-
-                    <span>
-                      Editar
-                    </span>
+                    <Pencil size={18} />
+                    <span>Editar</span>
                   </button>
                 )}
               </div>
             </div>
           ) : (
-            <div
-              className={
-                styles.footer
-              }
-            >
+            <div className={styles.footer}>
               <button
                 type="button"
                 className={
@@ -1436,9 +1268,7 @@ export default function UserModal({
 
               <button
                 type="submit"
-                className={
-                  styles.saveButton
-                }
+                className={styles.saveButton}
                 disabled={isBusy}
               >
                 <Save size={18} />

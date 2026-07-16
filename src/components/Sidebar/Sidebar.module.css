@@ -1,79 +1,167 @@
 .sidebar {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 100;
+
+  width: 280px;
+  height: 100dvh;
+  min-height: 0;
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+
   background: #ffffff;
-  border-right: 1px solid #d9d9d9;
+  border-right: 1px solid #e5e7eb;
 }
 
 .brand {
-  padding: 28px 20px 20px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
+  padding: 36px 28px 28px;
 }
 
 .brandIcon {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
-  background: #e8f1fb;
-  color: #1f6fc2;
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+
+  border-radius: 18px;
+  background: #e8f1fb;
+  color: #1f6fc2;
 }
 
 .brandText {
+  min-width: 0;
+
   display: flex;
   flex-direction: column;
-  line-height: 1.1;
+
+  line-height: 1.05;
 }
 
 .brandTitle {
-  font-size: 1.05rem;
   color: #111827;
+  font-size: 1.25rem;
+  font-weight: 800;
+  white-space: nowrap;
 }
 
 .brandSubtitle {
-  font-size: 0.92rem;
-  color: #4b5563;
+  margin-top: 4px;
+
+  color: #374151;
+  font-size: 1rem;
+  white-space: nowrap;
 }
 
 .nav {
-  padding: 8px 16px 20px;
   display: flex;
   flex-direction: column;
   gap: 8px;
+
+  padding: 12px 24px;
 }
 
 .link {
-  height: 48px;
-  padding: 0 14px;
-  border-radius: 12px;
-  text-decoration: none;
-  color: #4b5563;
+  min-height: 56px;
+
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-weight: 600;
-  transition: background 0.2s ease, color 0.2s ease;
+  gap: 15px;
+
+  padding: 0 18px;
+
+  border-radius: 14px;
+
+  color: #4b5563;
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-decoration: none;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .link:hover {
-  background: #f8fafc;
+  background: #f3f6fa;
+  color: #1f6fc2;
+}
+
+.link:active {
+  transform: translateY(1px);
 }
 
 .active {
+  background: #2776c9;
+  color: #ffffff;
+}
+
+.active:hover {
   background: #1f6fc2;
-  color: white;
+  color: #ffffff;
 }
 
 .desktopFooter {
+  position: relative;
+
   margin-top: auto;
-  padding: 16px;
+  padding: 16px 22px;
+
   border-top: 1px solid #e5e7eb;
+  background: #ffffff;
+}
+
+.accountWrapper {
+  position: relative;
+}
+
+.accountButton {
+  width: 100%;
+  min-height: 70px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  padding: 9px 10px;
+
+  border: none;
+  border-radius: 14px;
+
+  background: transparent;
+  color: inherit;
+
+  font: inherit;
+  text-align: left;
+
+  cursor: pointer;
+
+  transition: background 0.2s ease;
+}
+
+.accountButton:hover {
+  background: #f3f6fa;
+}
+
+.accountButton:focus-visible {
+  outline: 3px solid rgba(31, 111, 194, 0.2);
+  outline-offset: 2px;
 }
 
 .userBlock {
+  min-width: 0;
+
   display: flex;
   align-items: center;
   gap: 12px;
@@ -81,92 +169,281 @@
 
 .avatar,
 .avatarImage {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
+  width: 48px;
+  height: 48px;
   flex-shrink: 0;
-}
 
-.avatar {
-  background: #e8f1fb;
-  color: #1f6fc2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
+  border-radius: 50%;
 }
 
 .avatarImage {
+  display: block;
+
   object-fit: cover;
-  border: 2px solid #e8f1fb;
+
+  border: 2px solid #dbe7f5;
+}
+
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 2px solid #dbe7f5;
+
+  background: #e8f1fb;
+  color: #1f6fc2;
+
+  font-size: 1.05rem;
+  font-weight: 800;
 }
 
 .userText {
+  min-width: 0;
+
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
 }
 
 .userName {
-  font-size: 0.95rem;
+  max-width: 145px;
+
+  overflow: hidden;
+
   color: #111827;
+  font-size: 0.98rem;
+  font-weight: 750;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .userRole {
-  font-size: 0.85rem;
+  max-width: 145px;
+
+  overflow: hidden;
+
   color: #6b7280;
+  font-size: 0.84rem;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-@media (min-width: 1024px) {
-  .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 220px;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
+.chevron {
+  flex-shrink: 0;
+
+  color: #6b7280;
+
+  transition: transform 0.2s ease;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.accountMenu {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 10px);
+  left: 0;
+  z-index: 200;
+
+  padding: 8px;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+
+  background: #ffffff;
+
+  box-shadow: 0 18px 45px
+    rgba(15, 23, 42, 0.16);
+}
+
+.menuHeader {
+  padding: 9px 11px 7px;
+
+  color: #6b7280;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.menuItem {
+  width: 100%;
+  min-height: 44px;
+
+  display: flex;
+  align-items: center;
+  gap: 11px;
+
+  padding: 0 11px;
+
+  border: none;
+  border-radius: 9px;
+
+  background: transparent;
+  color: #374151;
+
+  font: inherit;
+  font-size: 0.91rem;
+  font-weight: 650;
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.menuItem:hover {
+  background: #f3f6fa;
+  color: #1f6fc2;
+}
+
+.menuItem:focus-visible {
+  outline: 2px solid rgba(31, 111, 194, 0.25);
+  outline-offset: 1px;
+}
+
+.menuDivider {
+  height: 1px;
+
+  margin: 7px 4px;
+
+  background: #e5e7eb;
+}
+
+.logoutMenuItem {
+  color: #dc2626;
+}
+
+.logoutMenuItem:hover {
+  background: #fef2f2;
+  color: #b91c1c;
 }
 
 @media (max-width: 1023px) {
   .sidebar {
     position: fixed;
-    left: 0;
+    top: auto;
     right: 0;
     bottom: 0;
-    height: 82px;
-    border-right: none;
-    border-top: 1px solid #d9d9d9;
-    display: flex;
-    align-items: center;
-    padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+    left: 0;
     z-index: 100;
-    background: #ffffff;
+
+    width: 100%;
+    height: calc(
+      76px + env(safe-area-inset-bottom)
+    );
+    min-height: 0;
+
+    flex-direction: row;
+    align-items: stretch;
+
+    padding-bottom: env(
+      safe-area-inset-bottom
+    );
+
+    border-top: 1px solid #e5e7eb;
+    border-right: none;
+
+    box-shadow: 0 -6px 20px
+      rgba(15, 23, 42, 0.06);
   }
 
-  .brand,
-  .desktopFooter {
+  .brand {
     display: none;
   }
 
   .nav {
-    width: 100%;
+    flex: 1;
+
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(
+      2,
+      minmax(0, 1fr)
+    );
     gap: 4px;
-    padding: 0;
-    margin: 0;
+
+    padding: 7px 4px 6px 8px;
   }
 
   .link {
-    height: 64px;
-    border-radius: 14px;
+    min-height: 62px;
+
     flex-direction: column;
     justify-content: center;
-    gap: 6px;
-    padding: 0 4px;
-    font-size: 0.74rem;
-    text-align: center;
+    gap: 4px;
+
+    padding: 4px 8px;
+
+    border-radius: 12px;
+
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  .active {
+    background: #e8f1fb;
+    color: #1f6fc2;
+  }
+
+  .active:hover {
+    background: #e8f1fb;
+    color: #1f6fc2;
+  }
+
+  .desktopFooter {
+    width: 78px;
+
+    margin-top: 0;
+    padding: 7px 8px 6px 4px;
+
+    border-top: none;
+  }
+
+  .accountWrapper,
+  .accountButton {
+    height: 100%;
+  }
+
+  .accountButton {
+    min-height: 62px;
+
+    justify-content: center;
+
+    padding: 4px;
+
+    border-radius: 12px;
+  }
+
+  .userBlock {
+    justify-content: center;
+  }
+
+  .avatar,
+  .avatarImage {
+    width: 40px;
+    height: 40px;
+  }
+
+  .userText,
+  .chevron {
+    display: none;
+  }
+
+  .accountMenu {
+    position: fixed;
+    right: 16px;
+    bottom: calc(
+      88px + env(safe-area-inset-bottom)
+    );
+    left: 16px;
+
+    padding: 10px;
+  }
+
+  .menuItem {
+    min-height: 48px;
   }
 }

@@ -1,4 +1,9 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+} from "react-router-dom";
 import PublicLayout from "./layouts/PublicLayout";
 import AppLayout from "./layouts/AppLayout";
 
@@ -6,11 +11,19 @@ import HomePage from "./pages/Home/HomePage";
 import LoginPage from "./pages/Login/LoginPage";
 import AnimalsPage from "./pages/Animals/AnimalsPage";
 import VolunteersPage from "./pages/Volunteers/VolunteersPage";
-import SettingsPage from "./pages/Settings/SettingsPage";
-import { isAuthenticated } from "./services/authService";
+import {
+  isAuthenticated,
+} from "./services/authService";
 
 function ProtectedRoute({ children }) {
-  return isAuthenticated() ? children : <Navigate to="/login" replace />;
+  return isAuthenticated() ? (
+    children
+  ) : (
+    <Navigate
+      to="/login"
+      replace
+    />
+  );
 }
 
 export default function App() {
@@ -18,8 +31,15 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route element={<PublicLayout />}>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<LoginPage />} />
+          <Route
+            path="/"
+            element={<HomePage />}
+          />
+
+          <Route
+            path="/login"
+            element={<LoginPage />}
+          />
         </Route>
 
         <Route
@@ -30,10 +50,45 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<Navigate to="animals" replace />} />
-          <Route path="animals" element={<AnimalsPage />} />
-          <Route path="volunteers" element={<VolunteersPage />} />
-          <Route path="settings" element={<SettingsPage />} />
+          <Route
+            index
+            element={
+              <Navigate
+                to="animals"
+                replace
+              />
+            }
+          />
+
+          <Route
+            path="animals"
+            element={<AnimalsPage />}
+          />
+
+          <Route
+            path="volunteers"
+            element={<VolunteersPage />}
+          />
+
+          <Route
+            path="settings"
+            element={
+              <Navigate
+                to="/app/animals"
+                replace
+              />
+            }
+          />
+
+          <Route
+            path="*"
+            element={
+              <Navigate
+                to="/app/animals"
+                replace
+              />
+            }
+          />
         </Route>
       </Routes>
     </BrowserRouter>

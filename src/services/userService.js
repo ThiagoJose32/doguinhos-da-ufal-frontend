@@ -40,13 +40,9 @@ function buildCreatePayload(user) {
     email: user.email.trim(),
     senha: user.senha,
     perfil: user.perfil,
-    descricao:
-      user.descricao?.trim() || null,
-    telefone:
-      user.telefone?.trim() || null,
-    dataIngresso: toApiDateTime(
-      user.dataIngresso
-    ),
+    descricao: user.descricao?.trim() || null,
+    telefone: user.telefone?.trim() || null,
+    dataIngresso: toApiDateTime(user.dataIngresso),
     curso: user.curso?.trim() || null,
   };
 }
@@ -60,16 +56,19 @@ function buildUpdatePayload(user) {
       typeof user.ativo === "boolean"
         ? user.ativo
         : null,
-    descricao:
-      user.descricao?.trim() || null,
-    telefone:
-      user.telefone?.trim() || null,
-    dataIngresso: toApiDateTime(
-      user.dataIngresso
-    ),
+    descricao: user.descricao?.trim() || null,
+    telefone: user.telefone?.trim() || null,
+    dataIngresso: toApiDateTime(user.dataIngresso),
     curso: user.curso?.trim() || null,
   };
 
+  /*
+   * A senha só é enviada quando o administrador
+   * informou uma nova senha no formulário.
+   *
+   * Se ficar vazia, o campo não será enviado e
+   * a senha atual do usuário será mantida.
+   */
   if (user.senha?.trim()) {
     payload.senha = user.senha;
   }
@@ -78,28 +77,18 @@ function buildUpdatePayload(user) {
 }
 
 function buildOwnProfilePayload(user) {
-  const payload = {
-    nome: user.nome?.trim() || null,
-    descricao:
-      user.descricao?.trim() || null,
-    telefone:
-      user.telefone?.trim() || null,
-    dataIngresso: toApiDateTime(
-      user.dataIngresso
-    ),
+  return {
+    nome: user.nome?.trim() || "",
+    descricao: user.descricao?.trim() || null,
+    telefone: user.telefone?.trim() || null,
+    dataIngresso: toApiDateTime(user.dataIngresso),
     curso: user.curso?.trim() || null,
   };
-
-  if (user.senha?.trim()) {
-    payload.senha = user.senha;
-  }
-
-  return payload;
 }
 
 function buildFormData(
   payload,
-  fotoArquivo
+  fotoArquivo = null
 ) {
   const formData = new FormData();
 
@@ -113,18 +102,13 @@ function buildFormData(
   formData.append("dados", dadosBlob);
 
   if (fotoArquivo instanceof File) {
-    formData.append(
-      "foto",
-      fotoArquivo
-    );
+    formData.append("foto", fotoArquivo);
   }
 
   return formData;
 }
 
-function synchronizeAuthenticatedUser(
-  updatedUser
-) {
+function synchronizeAuthenticatedUser(updatedUser) {
   const currentUser = getCurrentUser();
 
   if (
@@ -158,17 +142,11 @@ export async function listUsers() {
 
   return response.data
     .map(mapUserFromApi)
-    .sort(
-      (
-        firstUser,
-        secondUser
-      ) =>
-        (
-          firstUser.nome || ""
-        ).localeCompare(
-          secondUser.nome || "",
-          "pt-BR"
-        )
+    .sort((firstUser, secondUser) =>
+      (firstUser.nome || "").localeCompare(
+        secondUser.nome || "",
+        "pt-BR"
+      )
     );
 }
 
@@ -257,6 +235,19 @@ export async function updateAuthenticatedUser(
   updateStoredUser(updatedUser);
 
   return updatedUser;
+}
+
+export async function updateAuthenticatedPassword(
+  senhaAtual,
+  novaSenha
+) {
+  await api.put(
+    "/api/usuarios/me/senha",
+    {
+      senhaAtual,
+      novaSenha,
+    }
+  );
 }
 
 export async function deleteUser(id) {

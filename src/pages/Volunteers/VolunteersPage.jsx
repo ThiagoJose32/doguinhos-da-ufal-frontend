@@ -13,13 +13,19 @@ import {
 import {
   getUserById,
   listUsers,
+  updateAuthenticatedUser,
 } from "../../services/userService";
 import styles from "../../styles/GridPage.module.css";
 
-const statusOptions = ["Ativo", "Inativo"];
+const statusOptions = [
+  "Ativo",
+  "Inativo",
+];
 
 function getUserStatus(user) {
-  return user.ativo ? "Ativo" : "Inativo";
+  return user.ativo
+    ? "Ativo"
+    : "Inativo";
 }
 
 function isAdministrator(user) {
@@ -81,9 +87,12 @@ export default function VolunteersPage() {
     getCurrentUser();
 
   const administrator =
-    isAdministrator(authenticatedUser);
+    isAdministrator(
+      authenticatedUser
+    );
 
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] =
+    useState([]);
 
   const [
     volunteerStatus,
@@ -93,7 +102,9 @@ export default function VolunteersPage() {
   const [
     selectedStatuses,
     setSelectedStatuses,
-  ] = useState([...statusOptions]);
+  ] = useState([
+    ...statusOptions,
+  ]);
 
   const [
     isFilterOpen,
@@ -168,10 +179,6 @@ export default function VolunteersPage() {
 
   function handleNewItem() {
     if (!administrator) {
-      setError(
-        "Apenas administradores podem cadastrar voluntários."
-      );
-
       return;
     }
 
@@ -189,17 +196,22 @@ export default function VolunteersPage() {
       const detailedUser =
         await getUserById(user.id);
 
-      setSelectedUser(detailedUser);
+      setSelectedUser(
+        detailedUser
+      );
+
       setModalMode("view");
       setModalOpen(true);
     } catch (detailsError) {
       console.error(
-        "Erro ao carregar detalhes do usuário:",
+        "Erro ao carregar detalhes:",
         detailsError
       );
 
       setError(
-        getErrorMessage(detailsError)
+        getErrorMessage(
+          detailsError
+        )
       );
     } finally {
       setLoadingDetails(false);
@@ -212,28 +224,46 @@ export default function VolunteersPage() {
     setModalMode("view");
   }
 
-  function handleEditUser() {
-    if (!administrator) {
-      setError(
-        "Apenas administradores podem editar voluntários."
-      );
+  function isSelectedAuthenticatedUser() {
+    return (
+      selectedUser?.id &&
+      authenticatedUser?.id &&
+      String(selectedUser.id) ===
+        String(
+          authenticatedUser.id
+        )
+    );
+  }
 
-      handleCloseModal();
+  function canEditSelectedUser() {
+    return (
+      administrator ||
+      isSelectedAuthenticatedUser()
+    );
+  }
+
+  function handleEditUser() {
+    if (!canEditSelectedUser()) {
       return;
     }
 
     setModalMode("edit");
   }
 
+  async function handleSaveOwnUser(
+    userPayload,
+    fotoArquivo
+  ) {
+    return updateAuthenticatedUser(
+      userPayload,
+      fotoArquivo
+    );
+  }
+
   function handleUserSaved(
     savedUser,
     savedMode
   ) {
-    if (!administrator) {
-      handleCloseModal();
-      return;
-    }
-
     setUsers((currentUsers) => {
       const alreadyExists =
         currentUsers.some(
@@ -243,10 +273,12 @@ export default function VolunteersPage() {
 
       const updatedUsers =
         alreadyExists
-          ? currentUsers.map((user) =>
-              user.id === savedUser.id
-                ? savedUser
-                : user
+          ? currentUsers.map(
+              (user) =>
+                user.id ===
+                savedUser.id
+                  ? savedUser
+                  : user
             )
           : [
               ...currentUsers,
@@ -279,15 +311,11 @@ export default function VolunteersPage() {
   function handleUserDeleted(
     deletedUser
   ) {
-    if (!administrator) {
-      handleCloseModal();
-      return;
-    }
-
     setUsers((currentUsers) =>
       currentUsers.filter(
         (user) =>
-          user.id !== deletedUser.id
+          user.id !==
+          deletedUser.id
       )
     );
 
@@ -301,7 +329,9 @@ export default function VolunteersPage() {
   function toggleStatus(status) {
     setSelectedStatuses(
       (currentStatuses) =>
-        currentStatuses.includes(status)
+        currentStatuses.includes(
+          status
+        )
           ? currentStatuses.filter(
               (item) =>
                 item !== status
@@ -327,23 +357,26 @@ export default function VolunteersPage() {
 
   const filteredVolunteers =
     useMemo(() => {
-      return users.filter((user) => {
-        const status =
-          getUserStatus(user);
+      return users.filter(
+        (user) => {
+          const status =
+            getUserStatus(user);
 
-        const matchesTab =
-          status === volunteerStatus;
+          const matchesTab =
+            status ===
+            volunteerStatus;
 
-        const matchesStatus =
-          selectedStatuses.includes(
-            status
+          const matchesStatus =
+            selectedStatuses.includes(
+              status
+            );
+
+          return (
+            matchesTab &&
+            matchesStatus
           );
-
-        return (
-          matchesTab &&
-          matchesStatus
-        );
-      });
+        }
+      );
     }, [
       users,
       volunteerStatus,
@@ -354,15 +387,38 @@ export default function VolunteersPage() {
     selectedStatuses.length ===
     statusOptions.length;
 
-  const isAuthenticatedUser =
-    selectedUser?.id &&
-    String(selectedUser.id) ===
-      String(authenticatedUser?.id);
+  const selectedIsCurrentUser =
+    isSelectedAuthenticatedUser();
 
-  const canDeleteSelectedUser =
+  const selectedCanBeEdited =
+    administrator ||
+    selectedIsCurrentUser;
+
+  const selectedCanBeDeleted =
     administrator &&
     selectedUser?.id &&
-    !isAuthenticatedUser;
+    !selectedIsCurrentUser;
+
+  /*
+   * O próprio usuário, inclusive quando for
+   * administrador, deve usar o endpoint /me.
+   *
+   * Isso impede alterações acidentais do próprio
+   * perfil, status ou e-mail.
+   */
+  const useOwnProfileEndpoint =
+    selectedIsCurrentUser;
+
+  /*
+   * O administrador só pode definir uma nova senha
+   * para outro usuário.
+   *
+   * A própria senha deve ser alterada pelo menu da
+   * conta, informando a senha atual.
+   */
+  const canManageSelectedPassword =
+    administrator &&
+    !selectedIsCurrentUser;
 
   return (
     <section className={styles.page}>
@@ -608,30 +664,39 @@ export default function VolunteersPage() {
 
       <UserModal
         open={modalOpen}
-        mode={
-          administrator
-            ? modalMode
-            : "view"
-        }
+        mode={modalMode}
         user={selectedUser}
+        lockAccessFields={
+          useOwnProfileEndpoint
+        }
         canDelete={Boolean(
-          canDeleteSelectedUser
+          selectedCanBeDeleted
         )}
+        canManagePassword={
+          canManageSelectedPassword
+        }
+        saveAction={
+          useOwnProfileEndpoint &&
+          modalMode === "edit"
+            ? handleSaveOwnUser
+            : undefined
+        }
         onClose={
           handleCloseModal
         }
         onEdit={
-          administrator
+          selectedCanBeEdited
             ? handleEditUser
             : undefined
         }
         onSaved={
-          administrator
+          selectedCanBeEdited ||
+          modalMode === "create"
             ? handleUserSaved
             : undefined
         }
         onDeleted={
-          administrator
+          selectedCanBeDeleted
             ? handleUserDeleted
             : undefined
         }

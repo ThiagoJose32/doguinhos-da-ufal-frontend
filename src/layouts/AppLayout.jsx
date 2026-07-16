@@ -6,6 +6,7 @@ export default function AppLayout() {
   return (
     <div className={styles.wrapper}>
       <Sidebar />
+
       <main className={styles.content}>
         <Outlet />
       </main>

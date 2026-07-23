@@ -29,6 +29,15 @@ import volJoandeson from "../../assets/volunteers/vol-joandeson.jpg";
 import volLucas from "../../assets/volunteers/vol-lucas.jpg";
 import volVanessa from "../../assets/volunteers/vol-vanessa.jpg";
 
+import catAmarelinho from "../../assets/animals/cat-amarelinho.jpg";
+import catBatman from "../../assets/animals/cat-batman.jpg";
+import catCabecao from "../../assets/animals/cat-cabecao.jpg";
+import catChico from "../../assets/animals/cat-chico.jpg";
+import catCida from "../../assets/animals/cat-cida.jpg";
+import dogCacau from "../../assets/animals/dog-cacau.jpg";
+import dogAlfonso from "../../assets/animals/dog-alfonso.jpg";
+
+
 const teamText =
   "is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.";
 
@@ -43,6 +52,16 @@ const team = [
   { id: 8, name: "Joandeson Silva", photo: volJoandeson, text: teamText },
   { id: 9, name: "Lucas Armando da Silva", photo: volLucas, text: teamText },
   { id: 10, name: "Vanessa Costa", photo: volVanessa, text: teamText },
+];
+
+const animals = [
+  { id: 1, name: "Ralf", photo: catAmarelinho },
+  { id: 2, name: "Belinha", photo: catBatman },
+  { id: 3, name: "Samanta", photo: catCabecao },
+  { id: 4, name: "Theodoro", photo: catChico },
+  { id: 5, name: "Cidinha", photo: catCida },
+  { id: 6, name: "Cacau", photo: dogCacau },
+  { id: 7, name: "Alfonso", photo: dogAlfonso },
 ];
 
 const services = [
@@ -391,6 +410,22 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Adote nossos animais */}
+      <section className={styles.section}>
+        <SectionTitle>ADOTE NOSSOS ANIMAIS</SectionTitle>
+        
+        <div className={styles.animalGrid}>
+          {animals.map((animal) => (
+            <article key={animal.id} className={styles.animalCard}>
+              <div className={styles.animalPhoto}>
+                <img src={animal.photo} alt={animal.name} />
+              </div>
+              <h3 className={styles.animalName}>{animal.name}</h3>
+            </article>
+          ))}
+        </div>
+      </section>
+
       {/* Nossa equipe */}
       <section className={styles.section}>
         <SectionTitle>NOSSA EQUIPE</SectionTitle>
@@ -418,7 +453,7 @@ export default function HomePage() {
       <footer className={styles.footer}>
         <div className={styles.footerInner}>
           <div className={styles.footerLogo}>
-            <img src={petLogo} alt="PET FEAL" />
+            <img src={petLogo} alt="PET IFAL" />
           </div>
 
           <div className={styles.footerContent}>

@@ -1,4 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Funnel } from "lucide-react";
 
 import PageHeader from "../../components/PageHeader/PageHeader";
@@ -9,6 +13,7 @@ import {
   ANIMAL_STATUS_OPTIONS,
   createAnimal,
   deleteAnimal,
+  downloadAdoptionInterview,
   downloadAdoptionTerm,
   getAnimalById,
   listAnimals,
@@ -18,7 +23,8 @@ import {
 import styles from "../../styles/GridPage.module.css";
 
 function getErrorMessage(error) {
-  const responseData = error?.response?.data;
+  const responseData =
+    error?.response?.data;
 
   if (typeof responseData === "string") {
     return responseData;
@@ -33,20 +39,39 @@ function getErrorMessage(error) {
 }
 
 export default function AnimalsPage() {
-  const [animals, setAnimals] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [openingAnimalId, setOpeningAnimalId] = useState(null);
-  const [pageError, setPageError] = useState("");
+  const [animals, setAnimals] =
+    useState([]);
 
-  const [animalType, setAnimalType] = useState("dog");
+  const [loading, setLoading] =
+    useState(true);
 
-  const [selectedStatuses, setSelectedStatuses] = useState([
+  const [
+    openingAnimalId,
+    setOpeningAnimalId,
+  ] = useState(null);
+
+  const [pageError, setPageError] =
+    useState("");
+
+  const [animalType, setAnimalType] =
+    useState("dog");
+
+  const [
+    selectedStatuses,
+    setSelectedStatuses,
+  ] = useState([
     ...ANIMAL_STATUS_OPTIONS,
   ]);
 
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [
+    isFilterOpen,
+    setIsFilterOpen,
+  ] = useState(false);
 
-  const [modalConfig, setModalConfig] = useState({
+  const [
+    modalConfig,
+    setModalConfig,
+  ] = useState({
     isOpen: false,
     mode: "view",
     animal: null,
@@ -60,14 +85,17 @@ export default function AnimalsPage() {
       setPageError("");
 
       try {
-        const animalsFromApi = await listAnimals();
+        const animalsFromApi =
+          await listAnimals();
 
         if (active) {
           setAnimals(animalsFromApi);
         }
       } catch (error) {
         if (active) {
-          setPageError(getErrorMessage(error));
+          setPageError(
+            getErrorMessage(error)
+          );
         }
       } finally {
         if (active) {
@@ -92,7 +120,10 @@ export default function AnimalsPage() {
   }
 
   async function handleOpenAnimal(animal) {
-    if (!animal?.id || openingAnimalId) {
+    if (
+      !animal?.id ||
+      openingAnimalId
+    ) {
       return;
     }
 
@@ -100,7 +131,8 @@ export default function AnimalsPage() {
     setPageError("");
 
     try {
-      const detailedAnimal = await getAnimalById(animal.id);
+      const detailedAnimal =
+        await getAnimalById(animal.id);
 
       setModalConfig({
         isOpen: true,
@@ -109,7 +141,9 @@ export default function AnimalsPage() {
       });
     } catch (error) {
       setPageError(
-        `Não foi possível abrir o animal. ${getErrorMessage(error)}`
+        `Não foi possível abrir o animal. ${getErrorMessage(
+          error
+        )}`
       );
     } finally {
       setOpeningAnimalId(null);
@@ -124,9 +158,13 @@ export default function AnimalsPage() {
     });
   }
 
-  async function handleSaveAnimal(payload, mode) {
+  async function handleSaveAnimal(
+    payload,
+    mode
+  ) {
     if (mode === "create") {
-      const createdAnimal = await createAnimal(payload);
+      const createdAnimal =
+        await createAnimal(payload);
 
       setAnimals((currentAnimals) => [
         createdAnimal,
@@ -139,10 +177,11 @@ export default function AnimalsPage() {
     }
 
     if (mode === "edit") {
-      const updatedAnimal = await updateAnimal(
-        payload.id,
-        payload
-      );
+      const updatedAnimal =
+        await updateAnimal(
+          payload.id,
+          payload
+        );
 
       setAnimals((currentAnimals) =>
         currentAnimals.map((animal) =>
@@ -164,7 +203,43 @@ export default function AnimalsPage() {
     return payload;
   }
 
-  async function handleDeleteAnimal(animal) {
+  async function handleRefreshAnimal(
+    animalId
+  ) {
+    const refreshedAnimal =
+      await getAnimalById(animalId);
+
+    setAnimals((currentAnimals) =>
+      currentAnimals.map((animal) =>
+        animal.id === refreshedAnimal.id
+          ? refreshedAnimal
+          : animal
+      )
+    );
+
+    setModalConfig(
+      (currentConfig) => {
+        if (
+          !currentConfig.isOpen ||
+          currentConfig.animal?.id !==
+            refreshedAnimal.id
+        ) {
+          return currentConfig;
+        }
+
+        return {
+          ...currentConfig,
+          animal: refreshedAnimal,
+        };
+      }
+    );
+
+    return refreshedAnimal;
+  }
+
+  async function handleDeleteAnimal(
+    animal
+  ) {
     await deleteAnimal(animal.id);
 
     setAnimals((currentAnimals) =>
@@ -177,18 +252,32 @@ export default function AnimalsPage() {
     handleCloseModal();
   }
 
-  async function handleOpenAdoptionTerm(animal) {
+  async function handleOpenAdoptionInterview(
+    animal
+  ) {
+    await downloadAdoptionInterview(
+      animal
+    );
+  }
+
+  async function handleOpenAdoptionTerm(
+    animal
+  ) {
     await downloadAdoptionTerm(animal);
   }
 
   function toggleStatus(status) {
-    setSelectedStatuses((currentStatuses) =>
-      currentStatuses.includes(status)
-        ? currentStatuses.filter(
-            (currentStatus) =>
-              currentStatus !== status
-          )
-        : [...currentStatuses, status]
+    setSelectedStatuses(
+      (currentStatuses) =>
+        currentStatuses.includes(status)
+          ? currentStatuses.filter(
+              (currentStatus) =>
+                currentStatus !== status
+            )
+          : [
+              ...currentStatuses,
+              status,
+            ]
     );
   }
 
@@ -204,17 +293,30 @@ export default function AnimalsPage() {
     );
   }
 
-  const filteredAnimals = useMemo(() => {
-    return animals.filter((animal) => {
-      const matchesType =
-        animal.especie === animalType;
+  const filteredAnimals =
+    useMemo(() => {
+      return animals.filter(
+        (animal) => {
+          const matchesType =
+            animal.especie ===
+            animalType;
 
-      const matchesStatus =
-        selectedStatuses.includes(animal.status);
+          const matchesStatus =
+            selectedStatuses.includes(
+              animal.status
+            );
 
-      return matchesType && matchesStatus;
-    });
-  }, [animals, animalType, selectedStatuses]);
+          return (
+            matchesType &&
+            matchesStatus
+          );
+        }
+      );
+    }, [
+      animals,
+      animalType,
+      selectedStatuses,
+    ]);
 
   const allStatusesSelected =
     selectedStatuses.length ===
@@ -238,7 +340,9 @@ export default function AnimalsPage() {
                   ? styles.activeTab
                   : ""
               }`}
-              onClick={() => setAnimalType("dog")}
+              onClick={() =>
+                setAnimalType("dog")
+              }
             >
               Dogs
             </button>
@@ -250,37 +354,61 @@ export default function AnimalsPage() {
                   ? styles.activeTab
                   : ""
               }`}
-              onClick={() => setAnimalType("cat")}
+              onClick={() =>
+                setAnimalType("cat")
+              }
             >
               Cats
             </button>
           </div>
 
-          <div className={styles.toolbarRight}>
+          <div
+            className={
+              styles.toolbarRight
+            }
+          >
             <button
               type="button"
-              className={styles.filterButton}
+              className={
+                styles.filterButton
+              }
               onClick={() =>
-                setIsFilterOpen((current) => !current)
+                setIsFilterOpen(
+                  (current) => !current
+                )
               }
             >
               <Funnel size={18} />
 
-              <span className={styles.filterButtonText}>
+              <span
+                className={
+                  styles.filterButtonText
+                }
+              >
                 Filtros
               </span>
             </button>
 
             {isFilterOpen && (
-              <div className={styles.filterPanel}>
+              <div
+                className={
+                  styles.filterPanel
+                }
+              >
                 <button
                   type="button"
-                  className={styles.filterOption}
-                  onClick={toggleAllStatuses}
+                  className={
+                    styles.filterOption
+                  }
+                  onClick={
+                    toggleAllStatuses
+                  }
                 >
                   <input
                     type="checkbox"
-                    checked={allStatusesSelected}
+                    checked={
+                      allStatusesSelected
+                    }
                     readOnly
                   />
 
@@ -292,9 +420,13 @@ export default function AnimalsPage() {
                     <button
                       key={status}
                       type="button"
-                      className={styles.filterOption}
+                      className={
+                        styles.filterOption
+                      }
                       onClick={() =>
-                        toggleStatus(status)
+                        toggleStatus(
+                          status
+                        )
                       }
                     >
                       <input
@@ -316,7 +448,9 @@ export default function AnimalsPage() {
 
         <div className={styles.content}>
           {loading && (
-            <p>Carregando animais...</p>
+            <p>
+              Carregando animais...
+            </p>
           )}
 
           {!loading && pageError && (
@@ -325,32 +459,46 @@ export default function AnimalsPage() {
 
           {!loading &&
             !pageError &&
-            filteredAnimals.length === 0 && (
+            filteredAnimals.length ===
+              0 && (
               <p>
-                Nenhum animal encontrado para os
-                filtros selecionados.
+                Nenhum animal encontrado
+                para os filtros
+                selecionados.
               </p>
             )}
 
           {!loading &&
-            filteredAnimals.length > 0 && (
-              <div className={styles.cardsArea}>
-                {filteredAnimals.map((animal) => (
-                  <EntityCard
-                    key={animal.id}
-                    image={animal.imagem}
-                    title={animal.nome}
-                    subtitle={
-                      openingAnimalId === animal.id
-                        ? "Carregando informações..."
-                        : `${animal.sexo} - ${animal.idade}`
-                    }
-                    status={animal.status}
-                    onClick={() =>
-                      handleOpenAnimal(animal)
-                    }
-                  />
-                ))}
+            filteredAnimals.length >
+              0 && (
+              <div
+                className={
+                  styles.cardsArea
+                }
+              >
+                {filteredAnimals.map(
+                  (animal) => (
+                    <EntityCard
+                      key={animal.id}
+                      image={animal.imagem}
+                      title={animal.nome}
+                      subtitle={
+                        openingAnimalId ===
+                        animal.id
+                          ? "Carregando informações..."
+                          : `${animal.sexo} - ${animal.idade}`
+                      }
+                      status={
+                        animal.status
+                      }
+                      onClick={() =>
+                        handleOpenAnimal(
+                          animal
+                        )
+                      }
+                    />
+                  )
+                )}
               </div>
             )}
         </div>
@@ -358,11 +506,19 @@ export default function AnimalsPage() {
 
       <AnimalModal
         isOpen={modalConfig.isOpen}
-        initialMode={modalConfig.mode}
+        initialMode={
+          modalConfig.mode
+        }
         animal={modalConfig.animal}
         onClose={handleCloseModal}
         onSave={handleSaveAnimal}
         onDelete={handleDeleteAnimal}
+        onRefreshAnimal={
+          handleRefreshAnimal
+        }
+        onOpenAdoptionInterview={
+          handleOpenAdoptionInterview
+        }
         onOpenAdoptionTerm={
           handleOpenAdoptionTerm
         }

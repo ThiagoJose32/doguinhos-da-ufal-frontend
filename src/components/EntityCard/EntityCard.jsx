@@ -6,9 +6,6 @@ function getStatusClass(status) {
     case "No campus":
       return styles.statusNoCampus;
 
-    case "Em tratamento":
-      return styles.statusEmTratamento;
-
     case "Disponível para adoção":
       return styles.statusDisponivelAdocao;
 

@@ -1,14 +1,36 @@
-import { useEffect, useMemo, useState } from "react";
 import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+
+import {
+  CalendarDays,
   CircleX,
-  ExternalLink,
+  Download,
   FileText,
   Pencil,
+  Plus,
   Save,
   Trash2,
   Upload,
+  UserRound,
+  WalletCards,
   X,
 } from "lucide-react";
+
+import OccurrenceModal from "../OccurrenceModal/OccurrenceModal";
+
+import {
+  getOccurrenceById,
+  getOccurrenceTypeLabel,
+  isTerminalOccurrence,
+  listOccurrencesByAnimal,
+} from "../../services/occurrenceService";
+
+import {
+  ANIMAL_EDITABLE_STATUS_OPTIONS,
+} from "../../services/animalService";
 
 import styles from "./AnimalModal.module.css";
 
@@ -26,20 +48,6 @@ const especieOptions = [
     value: "cat",
     label: "Felina",
   },
-];
-
-const castradoOptions = [
-  "Sim",
-  "Não",
-];
-
-const statusOptions = [
-  "No campus",
-  "Em tratamento",
-  "Disponível para adoção",
-  "Adotado",
-  "Desaparecido",
-  "Óbito",
 ];
 
 const porteOptions = [
@@ -76,9 +84,14 @@ const emptyAnimal = {
   castrado: "Não",
   status: "No campus",
 
+  adocaoId: null,
+  ocorrenciaAdocaoId: null,
+  dataAdocao: "",
   adotanteNome: "",
 
-  termoAdocaoArquivo: null,
+  entrevistaAdocaoArquivoNome: "",
+  entrevistaAdocaoArquivoUrl: "",
+
   termoAdocaoArquivoNome: "",
   termoAdocaoArquivoUrl: "",
 };
@@ -94,12 +107,12 @@ function normalizeAnimal(animal) {
     ...emptyAnimal,
     ...animal,
     fotoArquivo: null,
-    termoAdocaoArquivo: null,
   };
 }
 
 function getErrorMessage(error) {
-  const responseData = error?.response?.data;
+  const responseData =
+    error?.response?.data;
 
   if (typeof responseData === "string") {
     return responseData;
@@ -113,6 +126,82 @@ function getErrorMessage(error) {
   );
 }
 
+function formatOccurrenceDate(value) {
+  if (!value) {
+    return "Data não informada";
+  }
+
+  const date = new Date(
+    `${value}T00:00:00`
+  );
+
+  if (Number.isNaN(date.getTime())) {
+    return "Data não informada";
+  }
+
+  return date.toLocaleDateString(
+    "pt-BR"
+  );
+}
+
+function formatCurrency(value) {
+  if (
+    value === null ||
+    value === undefined ||
+    value === ""
+  ) {
+    return "Sem custo informado";
+  }
+
+  const numericValue = Number(
+    String(value).replace(",", ".")
+  );
+
+  if (!Number.isFinite(numericValue)) {
+    return "Sem custo informado";
+  }
+
+  return numericValue.toLocaleString(
+    "pt-BR",
+    {
+      style: "currency",
+      currency: "BRL",
+    }
+  );
+}
+
+function sortOccurrences(items) {
+  return [...items].sort(
+    (
+      firstOccurrence,
+      secondOccurrence
+    ) => {
+      const dateComparison =
+        String(
+          secondOccurrence.data || ""
+        ).localeCompare(
+          String(
+            firstOccurrence.data || ""
+          )
+        );
+
+      if (dateComparison !== 0) {
+        return dateComparison;
+      }
+
+      return String(
+        secondOccurrence.dataCriacao ||
+          ""
+      ).localeCompare(
+        String(
+          firstOccurrence.dataCriacao ||
+            ""
+        )
+      );
+    }
+  );
+}
+
 export default function AnimalModal({
   isOpen,
   initialMode = "view",
@@ -120,54 +209,120 @@ export default function AnimalModal({
   onClose,
   onSave,
   onDelete,
+  onRefreshAnimal,
+  onOpenAdoptionInterview,
   onOpenAdoptionTerm,
 }) {
   const [mode, setMode] =
     useState(initialMode);
 
-  const [draft, setDraft] = useState(
-    normalizeAnimal(animal)
-  );
+  const [draft, setDraft] =
+    useState(() =>
+      normalizeAnimal(animal)
+    );
 
-  const [errorMessage, setErrorMessage] =
-    useState("");
+  const [
+    errorMessage,
+    setErrorMessage,
+  ] = useState("");
 
   const [isSaving, setIsSaving] =
     useState(false);
 
+  const [activeTab, setActiveTab] =
+    useState("information");
+
+  const [
+    occurrences,
+    setOccurrences,
+  ] = useState([]);
+
+  const [
+    occurrencesLoading,
+    setOccurrencesLoading,
+  ] = useState(false);
+
+  const [
+    occurrenceError,
+    setOccurrenceError,
+  ] = useState("");
+
+  const [
+    openingAdoptionOccurrence,
+    setOpeningAdoptionOccurrence,
+  ] = useState(false);
+
+  const [
+    occurrenceModalConfig,
+    setOccurrenceModalConfig,
+  ] = useState({
+    isOpen: false,
+    initialMode: "view",
+    occurrence: null,
+  });
+
   useEffect(() => {
-    if (isOpen) {
-      setMode(initialMode);
-      setDraft(normalizeAnimal(animal));
-      setErrorMessage("");
-      setIsSaving(false);
+    if (!isOpen) {
+      return;
     }
+
+    setMode(initialMode);
+
+    setDraft(
+      normalizeAnimal(animal)
+    );
+
+    setErrorMessage("");
+    setIsSaving(false);
+    setActiveTab("information");
+    setOccurrences([]);
+    setOccurrencesLoading(false);
+    setOccurrenceError("");
+
+    setOpeningAdoptionOccurrence(
+      false
+    );
+
+    setOccurrenceModalConfig({
+      isOpen: false,
+      initialMode: "view",
+      occurrence: null,
+    });
   }, [
     isOpen,
     initialMode,
     animal,
   ]);
 
-  const isCreateMode = mode === "create";
+  const isCreateMode =
+    mode === "create";
 
   const isEditMode =
     mode === "edit" ||
     mode === "create";
 
-  const isViewMode = mode === "view";
+  const isViewMode =
+    mode === "view";
 
-  const isAdopted =
-    draft.status === "Adotado";
+  const isProtectedStatus =
+    draft.status === "Adotado" ||
+    draft.status === "Óbito";
 
-  const hasTerm =
-    Boolean(
-      draft.termoAdocaoArquivoNome ||
-      draft.termoAdocaoArquivoUrl
+  const hasAdoption =
+    Boolean(draft.adocaoId);
+
+  const showTabs =
+    !isCreateMode &&
+    isViewMode;
+
+  const terminalOccurrence =
+    useMemo(
+      () =>
+        occurrences.find((item) =>
+          isTerminalOccurrence(item.tipo)
+        ) || null,
+      [occurrences]
     );
-
-  const hasLocalTerm =
-    draft.termoAdocaoArquivo instanceof File &&
-    Boolean(draft.termoAdocaoArquivoUrl);
 
   const modalTitle = useMemo(() => {
     if (isCreateMode) {
@@ -183,6 +338,60 @@ export default function AnimalModal({
     draft.nome,
   ]);
 
+  useEffect(() => {
+    if (
+      !isOpen ||
+      !draft.id ||
+      !isViewMode ||
+      activeTab !== "occurrences"
+    ) {
+      return;
+    }
+
+    let active = true;
+
+    async function loadOccurrences() {
+      setOccurrencesLoading(true);
+      setOccurrenceError("");
+
+      try {
+        const response =
+          await listOccurrencesByAnimal(
+            draft.id
+          );
+
+        if (active) {
+          setOccurrences(
+            sortOccurrences(response)
+          );
+        }
+      } catch (error) {
+        if (active) {
+          setOccurrenceError(
+            getErrorMessage(error)
+          );
+        }
+      } finally {
+        if (active) {
+          setOccurrencesLoading(
+            false
+          );
+        }
+      }
+    }
+
+    loadOccurrences();
+
+    return () => {
+      active = false;
+    };
+  }, [
+    isOpen,
+    draft.id,
+    isViewMode,
+    activeTab,
+  ]);
+
   if (!isOpen) {
     return null;
   }
@@ -196,27 +405,9 @@ export default function AnimalModal({
     setErrorMessage("");
   }
 
-  function handleStatusChange(value) {
-    if (value !== "Adotado") {
-      setDraft((currentDraft) => ({
-        ...currentDraft,
-        status: value,
-        adotanteNome: "",
-        termoAdocaoArquivo: null,
-        termoAdocaoArquivoNome: "",
-        termoAdocaoArquivoUrl: "",
-      }));
-    } else {
-      setDraft((currentDraft) => ({
-        ...currentDraft,
-        status: value,
-      }));
-    }
-
-    setErrorMessage("");
-  }
-
-  function handleProfileImageChange(event) {
+  function handleProfileImageChange(
+    event
+  ) {
     const file =
       event.target.files?.[0];
 
@@ -224,7 +415,9 @@ export default function AnimalModal({
       return;
     }
 
-    if (!file.type.startsWith("image/")) {
+    if (
+      !file.type.startsWith("image/")
+    ) {
       setErrorMessage(
         "Selecione um arquivo de imagem."
       );
@@ -244,65 +437,9 @@ export default function AnimalModal({
     setErrorMessage("");
   }
 
-  function handleAdoptionTermChange(event) {
-    const file =
-      event.target.files?.[0];
-
-    if (!file) {
-      return;
-    }
-
-    if (file.type !== "application/pdf") {
-      setErrorMessage(
-        "O termo de adoção deve ser um arquivo PDF."
-      );
-
-      return;
-    }
-
-    const previewUrl =
-      URL.createObjectURL(file);
-
-    setDraft((currentDraft) => ({
-      ...currentDraft,
-      termoAdocaoArquivo: file,
-      termoAdocaoArquivoNome: file.name,
-      termoAdocaoArquivoUrl: previewUrl,
-    }));
-
-    setErrorMessage("");
-  }
-
   function validateForm() {
     if (!draft.nome.trim()) {
       return "Informe o nome do animal.";
-    }
-
-    if (!draft.dataEstimadaNascimento) {
-      return "Informe a data estimada de nascimento.";
-    }
-
-    if (!draft.descricao.trim()) {
-      return "Informe a descrição do animal.";
-    }
-
-    if (draft.status === "Adotado") {
-      if (!draft.adotanteNome.trim()) {
-        return (
-          "Para marcar como adotado, " +
-          "informe o nome do adotante."
-        );
-      }
-
-      if (
-        !draft.termoAdocaoArquivo &&
-        !draft.termoAdocaoArquivoNome
-      ) {
-        return (
-          "Para marcar como adotado, " +
-          "anexe o termo de adoção em PDF."
-        );
-      }
     }
 
     return "";
@@ -317,36 +454,17 @@ export default function AnimalModal({
       return;
     }
 
-    const payload = {
-      ...draft,
-
-      adotanteNome:
-        draft.status === "Adotado"
-          ? draft.adotanteNome
-          : "",
-
-      termoAdocaoArquivo:
-        draft.status === "Adotado"
-          ? draft.termoAdocaoArquivo
-          : null,
-
-      termoAdocaoArquivoNome:
-        draft.status === "Adotado"
-          ? draft.termoAdocaoArquivoNome
-          : "",
-
-      termoAdocaoArquivoUrl:
-        draft.status === "Adotado"
-          ? draft.termoAdocaoArquivoUrl
-          : "",
-    };
-
     setIsSaving(true);
     setErrorMessage("");
 
     try {
       const savedAnimal =
-        await onSave(payload, mode);
+        await onSave(
+          {
+            ...draft,
+          },
+          mode
+        );
 
       if (savedAnimal) {
         setDraft(
@@ -356,6 +474,7 @@ export default function AnimalModal({
 
       if (mode === "edit") {
         setMode("view");
+        setActiveTab("information");
       }
     } catch (error) {
       setErrorMessage(
@@ -371,9 +490,10 @@ export default function AnimalModal({
       return;
     }
 
-    const confirmed = window.confirm(
-      `Deseja realmente excluir o animal "${draft.nome}"?`
-    );
+    const confirmed =
+      window.confirm(
+        `Deseja realmente excluir o animal "${draft.nome}"?`
+      );
 
     if (!confirmed) {
       return;
@@ -399,16 +519,206 @@ export default function AnimalModal({
     );
 
     setMode("view");
+    setActiveTab("information");
     setErrorMessage("");
   }
 
-  async function handleOpenTerm(event) {
-    if (hasLocalTerm) {
+  function handleNewOccurrence() {
+    setOccurrenceModalConfig({
+      isOpen: true,
+      initialMode: "create",
+      occurrence: null,
+    });
+  }
+
+  function handleOpenOccurrence(
+    occurrence
+  ) {
+    setOccurrenceModalConfig({
+      isOpen: true,
+      initialMode: "view",
+      occurrence,
+    });
+  }
+
+  function handleCloseOccurrenceModal() {
+    setOccurrenceModalConfig({
+      isOpen: false,
+      initialMode: "view",
+      occurrence: null,
+    });
+  }
+
+  async function refreshAnimal() {
+    if (
+      !onRefreshAnimal ||
+      !draft.id
+    ) {
+      return null;
+    }
+
+    const refreshedAnimal =
+      await onRefreshAnimal(draft.id);
+
+    if (refreshedAnimal) {
+      setDraft(
+        normalizeAnimal(
+          refreshedAnimal
+        )
+      );
+    }
+
+    return refreshedAnimal;
+  }
+
+  async function handleOccurrenceSaved(
+    savedOccurrence
+  ) {
+    setOccurrences(
+      (currentOccurrences) => {
+        const alreadyExists =
+          currentOccurrences.some(
+            (currentOccurrence) =>
+              currentOccurrence.id ===
+              savedOccurrence.id
+          );
+
+        const updatedOccurrences =
+          alreadyExists
+            ? currentOccurrences.map(
+                (
+                  currentOccurrence
+                ) =>
+                  currentOccurrence.id ===
+                  savedOccurrence.id
+                    ? savedOccurrence
+                    : currentOccurrence
+              )
+            : [
+                savedOccurrence,
+                ...currentOccurrences,
+              ];
+
+        return sortOccurrences(
+          updatedOccurrences
+        );
+      }
+    );
+
+    handleCloseOccurrenceModal();
+    setOccurrenceError("");
+
+    try {
+      await refreshAnimal();
+    } catch (error) {
+      setOccurrenceError(
+        "A ocorrência foi salva, mas não foi possível atualizar os dados do animal. " +
+        getErrorMessage(error)
+      );
+    }
+  }
+
+  async function handleOccurrenceDeleted(
+    deletedOccurrence
+  ) {
+    setOccurrences(
+      (currentOccurrences) =>
+        currentOccurrences.filter(
+          (currentOccurrence) =>
+            currentOccurrence.id !==
+            deletedOccurrence.id
+        )
+    );
+
+    handleCloseOccurrenceModal();
+    setOccurrenceError("");
+
+    try {
+      await refreshAnimal();
+    } catch (error) {
+      setOccurrenceError(
+        "A ocorrência foi excluída, mas não foi possível atualizar os dados do animal. " +
+        getErrorMessage(error)
+      );
+    }
+  }
+
+  async function handleRetryOccurrences() {
+    if (!draft.id) {
       return;
     }
 
-    event.preventDefault();
+    setOccurrencesLoading(true);
+    setOccurrenceError("");
 
+    try {
+      const response =
+        await listOccurrencesByAnimal(
+          draft.id
+        );
+
+      setOccurrences(
+        sortOccurrences(response)
+      );
+    } catch (error) {
+      setOccurrenceError(
+        getErrorMessage(error)
+      );
+    } finally {
+      setOccurrencesLoading(false);
+    }
+  }
+
+  async function handleOpenAdoptionOccurrence() {
+    if (!draft.ocorrenciaAdocaoId) {
+      return;
+    }
+
+    setOpeningAdoptionOccurrence(
+      true
+    );
+
+    setErrorMessage("");
+
+    try {
+      const occurrence =
+        await getOccurrenceById(
+          draft.ocorrenciaAdocaoId
+        );
+
+      setOccurrenceModalConfig({
+        isOpen: true,
+        initialMode: "view",
+        occurrence,
+      });
+    } catch (error) {
+      setErrorMessage(
+        getErrorMessage(error)
+      );
+    } finally {
+      setOpeningAdoptionOccurrence(
+        false
+      );
+    }
+  }
+
+  async function handleDownloadInterview() {
+    if (!onOpenAdoptionInterview) {
+      return;
+    }
+
+    try {
+      await onOpenAdoptionInterview(
+        draft
+      );
+    } catch (error) {
+      setErrorMessage(
+        getErrorMessage(error)
+      );
+    }
+  }
+
+  async function handleDownloadTerm() {
     if (!onOpenAdoptionTerm) {
       return;
     }
@@ -422,664 +732,1037 @@ export default function AnimalModal({
     }
   }
 
-  return (
-    <div
-      className={styles.overlay}
-      onClick={() => {
-        if (!isSaving) {
-          onClose();
-        }
-      }}
-    >
-      <div
-        className={styles.modal}
-        onClick={(event) =>
-          event.stopPropagation()
-        }
-      >
-        <div className={styles.header}>
-          <div className={styles.headerText}>
-            <span className={styles.headerTag}>
-              {isCreateMode
-                ? "Novo animal"
-                : "Animal"}
-            </span>
+  const informationContent = (
+    <div className={styles.body}>
+      <div className={styles.leftColumn}>
+        <div className={styles.card}>
+          <h3
+            className={
+              styles.sectionTitle
+            }
+          >
+            Foto de perfil
+          </h3>
 
-            <h2 className={styles.title}>
-              {modalTitle}
-            </h2>
-          </div>
-
-          <div className={styles.headerActions}>
-            {!isCreateMode && (
-              <span
-                className={styles.statusBadge}
-              >
-                {draft.status}
-              </span>
-            )}
-
-            <button
-              type="button"
-              className={styles.closeButton}
-              onClick={onClose}
-              disabled={isSaving}
+          {draft.imagem ? (
+            <img
+              src={draft.imagem}
+              alt={
+                draft.nome ||
+                "Animal"
+              }
+              className={
+                styles.profileImage
+              }
+            />
+          ) : (
+            <div
+              className={
+                styles.emptyImage
+              }
             >
-              <X size={18} />
-            </button>
-          </div>
+              Sem foto cadastrada
+            </div>
+          )}
+
+          {isEditMode && (
+            <label
+              className={
+                styles.uploadButton
+              }
+            >
+              <Upload size={16} />
+
+              <span>
+                Selecionar foto
+              </span>
+
+              <input
+                type="file"
+                accept="image/jpeg,image/png"
+                className={
+                  styles.hiddenInput
+                }
+                onChange={
+                  handleProfileImageChange
+                }
+                disabled={isSaving}
+              />
+            </label>
+          )}
         </div>
+      </div>
 
-        <div className={styles.body}>
-          <div className={styles.leftColumn}>
-            <div className={styles.card}>
-              <h3
-                className={styles.sectionTitle}
+      <div className={styles.rightColumn}>
+        <div className={styles.card}>
+          <div className={styles.formGrid}>
+            <div className={styles.field}>
+              <label className={styles.label}>
+                Nome
+              </label>
+
+              <input
+                type="text"
+                className={styles.input}
+                value={draft.nome}
+                onChange={(event) =>
+                  handleChange(
+                    "nome",
+                    event.target.value
+                  )
+                }
+                disabled={
+                  !isEditMode ||
+                  isSaving
+                }
+              />
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label}>
+                Sexo
+              </label>
+
+              <select
+                className={styles.select}
+                value={draft.sexo}
+                onChange={(event) =>
+                  handleChange(
+                    "sexo",
+                    event.target.value
+                  )
+                }
+                disabled={
+                  !isEditMode ||
+                  isSaving
+                }
               >
-                Foto de perfil
-              </h3>
+                {sexoOptions.map(
+                  (option) => (
+                    <option
+                      key={option}
+                      value={option}
+                    >
+                      {option}
+                    </option>
+                  )
+                )}
+              </select>
+            </div>
 
-              {draft.imagem ? (
-                <img
-                  src={draft.imagem}
-                  alt={
-                    draft.nome ||
-                    "Animal"
-                  }
-                  className={
-                    styles.profileImage
-                  }
-                />
-              ) : (
-                <div
-                  className={
-                    styles.emptyImage
-                  }
-                >
-                  Sem foto cadastrada
-                </div>
-              )}
+            <div className={styles.field}>
+              <label className={styles.label}>
+                Espécie
+              </label>
+
+              <select
+                className={styles.select}
+                value={draft.especie}
+                onChange={(event) =>
+                  handleChange(
+                    "especie",
+                    event.target.value
+                  )
+                }
+                disabled={
+                  !isEditMode ||
+                  isSaving
+                }
+              >
+                {especieOptions.map(
+                  (option) => (
+                    <option
+                      key={option.value}
+                      value={option.value}
+                    >
+                      {option.label}
+                    </option>
+                  )
+                )}
+              </select>
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label}>
+                Data estimada de nascimento
+              </label>
+
+              <input
+                type="date"
+                className={styles.input}
+                value={
+                  draft.dataEstimadaNascimento
+                }
+                max={new Date()
+                  .toISOString()
+                  .split("T")[0]}
+                onChange={(event) =>
+                  handleChange(
+                    "dataEstimadaNascimento",
+                    event.target.value
+                  )
+                }
+                disabled={
+                  !isEditMode ||
+                  isSaving
+                }
+              />
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label}>
+                Porte
+              </label>
+
+              <select
+                className={styles.select}
+                value={draft.porte}
+                onChange={(event) =>
+                  handleChange(
+                    "porte",
+                    event.target.value
+                  )
+                }
+                disabled={
+                  !isEditMode ||
+                  isSaving
+                }
+              >
+                {porteOptions.map(
+                  (option) => (
+                    <option
+                      key={option}
+                      value={option}
+                    >
+                      {option}
+                    </option>
+                  )
+                )}
+              </select>
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label}>
+                Pelagem
+              </label>
+
+              <select
+                className={styles.select}
+                value={draft.corPelagem}
+                onChange={(event) =>
+                  handleChange(
+                    "corPelagem",
+                    event.target.value
+                  )
+                }
+                disabled={
+                  !isEditMode ||
+                  isSaving
+                }
+              >
+                {corPelagemOptions.map(
+                  (option) => (
+                    <option
+                      key={option}
+                      value={option}
+                    >
+                      {option}
+                    </option>
+                  )
+                )}
+              </select>
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label}>
+                Castrado(a)
+              </label>
+
+              <input
+                type="text"
+                className={`${styles.input} ${styles.inputReadOnly}`}
+                value={draft.castrado}
+                readOnly
+              />
 
               {isEditMode && (
-                <label
+                <span
                   className={
-                    styles.uploadButton
+                    styles.helperText
                   }
                 >
-                  <Upload size={16} />
-
-                  <span>
-                    Selecionar foto
-                  </span>
-
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/png"
-                    className={
-                      styles.hiddenInput
-                    }
-                    onChange={
-                      handleProfileImageChange
-                    }
-                    disabled={isSaving}
-                  />
-                </label>
+                  Este campo é atualizado por
+                  uma ocorrência de castração.
+                </span>
               )}
             </div>
-          </div>
 
-          <div className={styles.rightColumn}>
-            <div className={styles.card}>
-              <div
-                className={styles.formGrid}
+            <div className={styles.field}>
+              <label className={styles.label}>
+                Status
+              </label>
+
+              <select
+                className={styles.select}
+                value={draft.status}
+                onChange={(event) =>
+                  handleChange(
+                    "status",
+                    event.target.value
+                  )
+                }
+                disabled={
+                  !isEditMode ||
+                  isSaving ||
+                  isProtectedStatus
+                }
               >
-                <div className={styles.field}>
-                  <label
-                    className={styles.label}
-                  >
-                    Nome
-                  </label>
-
-                  <input
-                    type="text"
-                    className={styles.input}
-                    value={draft.nome}
-                    onChange={(event) =>
-                      handleChange(
-                        "nome",
-                        event.target.value
-                      )
-                    }
-                    disabled={
-                      !isEditMode ||
-                      isSaving
-                    }
-                  />
-                </div>
-
-                <div className={styles.field}>
-                  <label
-                    className={styles.label}
-                  >
-                    Sexo
-                  </label>
-
-                  <select
-                    className={styles.select}
-                    value={draft.sexo}
-                    onChange={(event) =>
-                      handleChange(
-                        "sexo",
-                        event.target.value
-                      )
-                    }
-                    disabled={
-                      !isEditMode ||
-                      isSaving
-                    }
-                  >
-                    {sexoOptions.map(
-                      (option) => (
-                        <option
-                          key={option}
-                          value={option}
-                        >
-                          {option}
-                        </option>
-                      )
-                    )}
-                  </select>
-                </div>
-
-                <div className={styles.field}>
-                  <label
-                    className={styles.label}
-                  >
-                    Espécie
-                  </label>
-
-                  <select
-                    className={styles.select}
-                    value={draft.especie}
-                    onChange={(event) =>
-                      handleChange(
-                        "especie",
-                        event.target.value
-                      )
-                    }
-                    disabled={
-                      !isEditMode ||
-                      isSaving
-                    }
-                  >
-                    {especieOptions.map(
-                      (option) => (
-                        <option
-                          key={option.value}
-                          value={option.value}
-                        >
-                          {option.label}
-                        </option>
-                      )
-                    )}
-                  </select>
-                </div>
-
-                <div className={styles.field}>
-                  <label
-                    className={styles.label}
-                  >
-                    Data estimada de nascimento
-                  </label>
-
-                  <input
-                    type="date"
-                    className={styles.input}
-                    value={
-                      draft.dataEstimadaNascimento
-                    }
-                    max={
-                      new Date()
-                        .toISOString()
-                        .split("T")[0]
-                    }
-                    onChange={(event) =>
-                      handleChange(
-                        "dataEstimadaNascimento",
-                        event.target.value
-                      )
-                    }
-                    disabled={
-                      !isEditMode ||
-                      isSaving
-                    }
-                  />
-                </div>
-
-                <div className={styles.field}>
-                  <label
-                    className={styles.label}
-                  >
-                    Porte
-                  </label>
-
-                  <select
-                    className={styles.select}
-                    value={draft.porte}
-                    onChange={(event) =>
-                      handleChange(
-                        "porte",
-                        event.target.value
-                      )
-                    }
-                    disabled={
-                      !isEditMode ||
-                      isSaving
-                    }
-                  >
-                    {porteOptions.map(
-                      (option) => (
-                        <option
-                          key={option}
-                          value={option}
-                        >
-                          {option}
-                        </option>
-                      )
-                    )}
-                  </select>
-                </div>
-
-                <div className={styles.field}>
-                  <label
-                    className={styles.label}
-                  >
-                    Pelagem
-                  </label>
-
-                  <select
-                    className={styles.select}
-                    value={
-                      draft.corPelagem
-                    }
-                    onChange={(event) =>
-                      handleChange(
-                        "corPelagem",
-                        event.target.value
-                      )
-                    }
-                    disabled={
-                      !isEditMode ||
-                      isSaving
-                    }
-                  >
-                    {corPelagemOptions.map(
-                      (option) => (
-                        <option
-                          key={option}
-                          value={option}
-                        >
-                          {option}
-                        </option>
-                      )
-                    )}
-                  </select>
-                </div>
-
-                <div className={styles.field}>
-                  <label
-                    className={styles.label}
-                  >
-                    Castrado(a)
-                  </label>
-
-                  <select
-                    className={styles.select}
-                    value={draft.castrado}
-                    onChange={(event) =>
-                      handleChange(
-                        "castrado",
-                        event.target.value
-                      )
-                    }
-                    disabled={
-                      !isEditMode ||
-                      isSaving
-                    }
-                  >
-                    {castradoOptions.map(
-                      (option) => (
-                        <option
-                          key={option}
-                          value={option}
-                        >
-                          {option}
-                        </option>
-                      )
-                    )}
-                  </select>
-                </div>
-
-                <div className={styles.field}>
-                  <label
-                    className={styles.label}
-                  >
-                    Status
-                  </label>
-
-                  <select
-                    className={styles.select}
+                {isProtectedStatus && (
+                  <option
                     value={draft.status}
-                    onChange={(event) =>
-                      handleStatusChange(
-                        event.target.value
-                      )
-                    }
-                    disabled={
-                      !isEditMode ||
-                      isSaving
-                    }
                   >
-                    {statusOptions.map(
-                      (option) => (
-                        <option
-                          key={option}
-                          value={option}
-                        >
-                          {option}
-                        </option>
-                      )
-                    )}
-                  </select>
-                </div>
+                    {draft.status}
+                  </option>
+                )}
 
-                <div
-                  className={styles.fieldFull}
-                >
-                  <label
-                    className={styles.label}
-                  >
-                    Adotante
-                  </label>
-
-                  <input
-                    type="text"
-                    className={styles.input}
-                    value={
-                      draft.adotanteNome
-                    }
-                    onChange={(event) =>
-                      handleChange(
-                        "adotanteNome",
-                        event.target.value
-                      )
-                    }
-                    disabled={
-                      !isEditMode ||
-                      !isAdopted ||
-                      isSaving
-                    }
-                    placeholder={
-                      isAdopted
-                        ? "Informe o nome do adotante"
-                        : "Disponível apenas quando o status for Adotado"
-                    }
-                  />
-                </div>
-
-                <div
-                  className={styles.fieldFull}
-                >
-                  <label
-                    className={styles.label}
-                  >
-                    Termo de adoção (PDF)
-                  </label>
-
-                  {isViewMode ? (
-                    hasTerm ? (
-                      <a
-                        href={
-                          hasLocalTerm
-                            ? draft.termoAdocaoArquivoUrl
-                            : "#"
-                        }
-                        target={
-                          hasLocalTerm
-                            ? "_blank"
-                            : undefined
-                        }
-                        rel="noreferrer"
-                        className={
-                          styles.fileLink
-                        }
-                        onClick={
-                          handleOpenTerm
-                        }
+                {!isProtectedStatus &&
+                  ANIMAL_EDITABLE_STATUS_OPTIONS.map(
+                    (option) => (
+                      <option
+                        key={option}
+                        value={option}
                       >
-                        <FileText size={16} />
-
-                        <span>
-                          {
-                            draft.termoAdocaoArquivoNome
-                          }
-                        </span>
-
-                        <ExternalLink
-                          size={16}
-                        />
-                      </a>
-                    ) : (
-                      <div
-                        className={
-                          styles.filePlaceholder
-                        }
-                      >
-                        Nenhum termo anexado
-                      </div>
+                        {option}
+                      </option>
                     )
-                  ) : (
-                    <div
-                      className={
-                        styles.fileInputWrapper
-                      }
-                    >
-                      <label
-                        className={`${
-                          styles.uploadButton
-                        } ${
-                          !isAdopted
-                            ? styles.uploadButtonDisabled
-                            : ""
-                        }`}
-                      >
-                        <Upload size={16} />
-
-                        <span>
-                          {draft.termoAdocaoArquivoNome ||
-                            "Selecionar PDF"}
-                        </span>
-
-                        <input
-                          type="file"
-                          accept="application/pdf"
-                          className={
-                            styles.hiddenInput
-                          }
-                          onChange={
-                            handleAdoptionTermChange
-                          }
-                          disabled={
-                            !isAdopted ||
-                            isSaving
-                          }
-                        />
-                      </label>
-
-                      {!isAdopted && (
-                        <span
-                          className={
-                            styles.helperText
-                          }
-                        >
-                          O termo é obrigatório
-                          apenas quando o status
-                          for Adotado.
-                        </span>
-                      )}
-                    </div>
                   )}
-                </div>
+              </select>
 
-                <div
-                  className={styles.fieldFull}
+              {isEditMode && (
+                <span
+                  className={
+                    styles.helperText
+                  }
                 >
-                  <label
-                    className={styles.label}
-                  >
-                    Descrição
-                  </label>
-
-                  <textarea
-                    className={styles.textarea}
-                    value={draft.descricao}
-                    onChange={(event) =>
-                      handleChange(
-                        "descricao",
-                        event.target.value
-                      )
-                    }
-                    disabled={
-                      !isEditMode ||
-                      isSaving
-                    }
-                  />
-                </div>
-              </div>
-
-              {errorMessage && (
-                <div
-                  className={styles.errorBox}
-                >
-                  {errorMessage}
-                </div>
+                  Adoção e óbito devem ser
+                  registrados por meio de
+                  ocorrências.
+                </span>
               )}
             </div>
+
+            <div
+              className={
+                styles.fieldFull
+              }
+            >
+              <label className={styles.label}>
+                Descrição
+              </label>
+
+              <textarea
+                className={styles.textarea}
+                value={draft.descricao}
+                onChange={(event) =>
+                  handleChange(
+                    "descricao",
+                    event.target.value
+                  )
+                }
+                disabled={
+                  !isEditMode ||
+                  isSaving
+                }
+              />
+            </div>
           </div>
+
+          {errorMessage && (
+            <div
+              className={
+                styles.errorBox
+              }
+            >
+              {errorMessage}
+            </div>
+          )}
         </div>
 
-        <div className={styles.footer}>
-          {isViewMode && (
-            <>
-              {onDelete && draft.id && (
+        {hasAdoption && (
+          <div
+            className={
+              styles.adoptionCard
+            }
+          >
+            <div
+              className={
+                styles.adoptionHeader
+              }
+            >
+              <div>
+                <h3
+                  className={
+                    styles.sectionTitle
+                  }
+                >
+                  Dados da adoção
+                </h3>
+
+                <p
+                  className={
+                    styles.helperText
+                  }
+                >
+                  Documentos vinculados à
+                  ocorrência de adoção.
+                </p>
+              </div>
+            </div>
+
+            <div
+              className={
+                styles.adoptionGrid
+              }
+            >
+              <div
+                className={
+                  styles.adoptionItem
+                }
+              >
+                <span
+                  className={
+                    styles.adoptionLabel
+                  }
+                >
+                  Adotante
+                </span>
+
+                <strong
+                  className={
+                    styles.adoptionValue
+                  }
+                >
+                  {draft.adotanteNome ||
+                    "Não informado"}
+                </strong>
+              </div>
+
+              <div
+                className={
+                  styles.adoptionItem
+                }
+              >
+                <span
+                  className={
+                    styles.adoptionLabel
+                  }
+                >
+                  Data da adoção
+                </span>
+
+                <strong
+                  className={
+                    styles.adoptionValue
+                  }
+                >
+                  {formatOccurrenceDate(
+                    draft.dataAdocao
+                  )}
+                </strong>
+              </div>
+            </div>
+
+            <div
+              className={
+                styles.adoptionActions
+              }
+            >
+              {draft.entrevistaAdocaoArquivoNome && (
+                <button
+                  type="button"
+                  className={
+                    styles.documentButton
+                  }
+                  onClick={
+                    handleDownloadInterview
+                  }
+                >
+                  <FileText size={17} />
+                  <span>
+                    Baixar entrevista
+                  </span>
+                  <Download size={16} />
+                </button>
+              )}
+
+              {draft.termoAdocaoArquivoNome && (
+                <button
+                  type="button"
+                  className={
+                    styles.documentButton
+                  }
+                  onClick={
+                    handleDownloadTerm
+                  }
+                >
+                  <FileText size={17} />
+                  <span>
+                    Baixar termo
+                  </span>
+                  <Download size={16} />
+                </button>
+              )}
+
+              {draft.ocorrenciaAdocaoId && (
+                <button
+                  type="button"
+                  className={
+                    styles.occurrenceLinkButton
+                  }
+                  onClick={
+                    handleOpenAdoptionOccurrence
+                  }
+                  disabled={
+                    openingAdoptionOccurrence
+                  }
+                >
+                  <CalendarDays size={17} />
+
+                  <span>
+                    {openingAdoptionOccurrence
+                      ? "Abrindo..."
+                      : "Ver ocorrência"}
+                  </span>
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  const occurrencesContent = (
+    <div
+      className={
+        styles.occurrencesBody
+      }
+    >
+      <div
+        className={
+          styles.occurrencesPanel
+        }
+      >
+        <div
+          className={
+            styles.occurrencesHeader
+          }
+        >
+          <div
+            className={
+              styles.occurrencesTitleGroup
+            }
+          >
+            <h3
+              className={
+                styles.occurrencesTitle
+              }
+            >
+              Histórico de ocorrências
+            </h3>
+
+            <p
+              className={
+                styles.occurrencesSubtitle
+              }
+            >
+              Registre acontecimentos,
+              cuidados e procedimentos
+              relacionados ao animal.
+            </p>
+
+            {terminalOccurrence && (
+              <p
+                className={
+                  styles.occurrencesSubtitle
+                }
+              >
+                O histórico está encerrado por
+                uma ocorrência de{" "}
+                <strong>
+                  {getOccurrenceTypeLabel(
+                    terminalOccurrence.tipo
+                  )}
+                </strong>{" "}
+                em{" "}
+                <strong>
+                  {formatOccurrenceDate(
+                    terminalOccurrence.data
+                  )}
+                </strong>
+                . Ainda é possível cadastrar
+                ocorrências com data igual ou
+                anterior.
+              </p>
+            )}
+          </div>
+
+          <button
+            type="button"
+            className={
+              styles.newOccurrenceButton
+            }
+            onClick={
+              handleNewOccurrence
+            }
+          >
+            <Plus size={18} />
+            <span>Nova ocorrência</span>
+          </button>
+        </div>
+
+        {occurrencesLoading && (
+          <div
+            className={
+              styles.occurrenceState
+            }
+          >
+            Carregando ocorrências...
+          </div>
+        )}
+
+        {!occurrencesLoading &&
+          occurrenceError && (
+            <div
+              className={
+                styles.occurrenceErrorState
+              }
+            >
+              <span>
+                {occurrenceError}
+              </span>
+
+              <button
+                type="button"
+                className={
+                  styles.retryOccurrenceButton
+                }
+                onClick={
+                  handleRetryOccurrences
+                }
+              >
+                Tentar novamente
+              </button>
+            </div>
+          )}
+
+        {!occurrencesLoading &&
+          !occurrenceError &&
+          occurrences.length === 0 && (
+            <div
+              className={
+                styles.occurrenceState
+              }
+            >
+              Nenhuma ocorrência cadastrada
+              para este animal.
+            </div>
+          )}
+
+        {!occurrencesLoading &&
+          !occurrenceError &&
+          occurrences.length > 0 && (
+            <div
+              className={
+                styles.occurrenceList
+              }
+            >
+              {occurrences.map(
+                (occurrenceItem) => (
+                  <button
+                    key={
+                      occurrenceItem.id
+                    }
+                    type="button"
+                    className={
+                      styles.occurrenceCard
+                    }
+                    onClick={() =>
+                      handleOpenOccurrence(
+                        occurrenceItem
+                      )
+                    }
+                  >
+                    <div
+                      className={
+                        styles.occurrenceCardHeader
+                      }
+                    >
+                      <span
+                        className={
+                          styles.occurrenceTypeBadge
+                        }
+                      >
+                        {getOccurrenceTypeLabel(
+                          occurrenceItem.tipo
+                        )}
+                      </span>
+
+                      <span
+                        className={
+                          styles.occurrenceDate
+                        }
+                      >
+                        <CalendarDays
+                          size={15}
+                        />
+
+                        {formatOccurrenceDate(
+                          occurrenceItem.data
+                        )}
+                      </span>
+                    </div>
+
+                    <p
+                      className={
+                        styles.occurrenceDescription
+                      }
+                    >
+                      {occurrenceItem.descricao ||
+                        "Sem descrição cadastrada."}
+                    </p>
+
+                    <div
+                      className={
+                        styles.occurrenceMeta
+                      }
+                    >
+                      <span
+                        className={
+                          styles.occurrenceMetaItem
+                        }
+                      >
+                        <WalletCards
+                          size={15}
+                        />
+
+                        {formatCurrency(
+                          occurrenceItem.custo
+                        )}
+                      </span>
+
+                      <span
+                        className={
+                          styles.occurrenceMetaItem
+                        }
+                      >
+                        <UserRound
+                          size={15}
+                        />
+
+                        {occurrenceItem.criadoPorNome ||
+                          "Usuário não informado"}
+                      </span>
+                    </div>
+                  </button>
+                )
+              )}
+            </div>
+          )}
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+      <div
+        className={styles.overlay}
+        onClick={() => {
+          if (!isSaving) {
+            onClose();
+          }
+        }}
+      >
+        <div
+          className={styles.modal}
+          onClick={(event) =>
+            event.stopPropagation()
+          }
+        >
+          <div className={styles.header}>
+            <div
+              className={
+                styles.headerText
+              }
+            >
+              <span
+                className={
+                  styles.headerTag
+                }
+              >
+                {isCreateMode
+                  ? "Novo animal"
+                  : "Animal"}
+              </span>
+
+              <h2
+                className={styles.title}
+              >
+                {modalTitle}
+              </h2>
+            </div>
+
+            <div
+              className={
+                styles.headerActions
+              }
+            >
+              {!isCreateMode && (
+                <span
+                  className={
+                    styles.statusBadge
+                  }
+                >
+                  {draft.status}
+                </span>
+              )}
+
+              <button
+                type="button"
+                className={
+                  styles.closeButton
+                }
+                onClick={onClose}
+                disabled={isSaving}
+              >
+                <X size={18} />
+              </button>
+            </div>
+          </div>
+
+          {showTabs && (
+            <div
+              className={
+                styles.tabsBar
+              }
+            >
+              <button
+                type="button"
+                className={`${styles.tabButton} ${
+                  activeTab ===
+                  "information"
+                    ? styles.activeTab
+                    : ""
+                }`}
+                onClick={() =>
+                  setActiveTab(
+                    "information"
+                  )
+                }
+              >
+                Informações
+              </button>
+
+              <button
+                type="button"
+                className={`${styles.tabButton} ${
+                  activeTab ===
+                  "occurrences"
+                    ? styles.activeTab
+                    : ""
+                }`}
+                onClick={() =>
+                  setActiveTab(
+                    "occurrences"
+                  )
+                }
+              >
+                Ocorrências
+
+                <span
+                  className={
+                    styles.tabCount
+                  }
+                >
+                  {occurrences.length}
+                </span>
+              </button>
+            </div>
+          )}
+
+          {isViewMode &&
+          activeTab === "occurrences"
+            ? occurrencesContent
+            : informationContent}
+
+          <div className={styles.footer}>
+            {isViewMode &&
+              activeTab ===
+                "information" && (
+                <>
+                  {onDelete &&
+                    draft.id && (
+                      <button
+                        type="button"
+                        className={
+                          styles.secondaryActionButton
+                        }
+                        onClick={
+                          handleDelete
+                        }
+                        disabled={
+                          isSaving
+                        }
+                      >
+                        <Trash2
+                          size={16}
+                        />
+                        <span>Excluir</span>
+                      </button>
+                    )}
+
+                  <button
+                    type="button"
+                    className={
+                      styles.secondaryActionButton
+                    }
+                    onClick={onClose}
+                    disabled={isSaving}
+                  >
+                    <CircleX
+                      size={16}
+                    />
+                    <span>Fechar</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className={
+                      styles.primaryActionButton
+                    }
+                    onClick={() =>
+                      setMode("edit")
+                    }
+                    disabled={isSaving}
+                  >
+                    <Pencil size={16} />
+                    <span>Editar</span>
+                  </button>
+                </>
+              )}
+
+            {isViewMode &&
+              activeTab ===
+                "occurrences" && (
                 <button
                   type="button"
                   className={
                     styles.secondaryActionButton
                   }
-                  onClick={handleDelete}
+                  onClick={onClose}
                   disabled={isSaving}
                 >
-                  <Trash2 size={16} />
-                  <span>Excluir</span>
+                  <CircleX size={16} />
+                  <span>Fechar</span>
                 </button>
               )}
 
-              <button
-                type="button"
-                className={
-                  styles.secondaryActionButton
-                }
-                onClick={onClose}
-                disabled={isSaving}
-              >
-                <CircleX size={16} />
-                <span>Fechar</span>
-              </button>
+            {mode === "edit" && (
+              <>
+                <button
+                  type="button"
+                  className={
+                    styles.secondaryActionButton
+                  }
+                  onClick={
+                    handleCancelEdit
+                  }
+                  disabled={isSaving}
+                >
+                  <CircleX size={16} />
+                  <span>Cancelar</span>
+                </button>
 
-              <button
-                type="button"
-                className={
-                  styles.primaryActionButton
-                }
-                onClick={() =>
-                  setMode("edit")
-                }
-                disabled={isSaving}
-              >
-                <Pencil size={16} />
-                <span>Editar</span>
-              </button>
-            </>
-          )}
+                <button
+                  type="button"
+                  className={
+                    styles.primaryActionButton
+                  }
+                  onClick={handleSave}
+                  disabled={isSaving}
+                >
+                  <Save size={16} />
 
-          {mode === "edit" && (
-            <>
-              <button
-                type="button"
-                className={
-                  styles.secondaryActionButton
-                }
-                onClick={handleCancelEdit}
-                disabled={isSaving}
-              >
-                <CircleX size={16} />
-                <span>Cancelar</span>
-              </button>
+                  <span>
+                    {isSaving
+                      ? "Salvando..."
+                      : "Salvar alterações"}
+                  </span>
+                </button>
+              </>
+            )}
 
-              <button
-                type="button"
-                className={
-                  styles.primaryActionButton
-                }
-                onClick={handleSave}
-                disabled={isSaving}
-              >
-                <Save size={16} />
+            {mode === "create" && (
+              <>
+                <button
+                  type="button"
+                  className={
+                    styles.secondaryActionButton
+                  }
+                  onClick={onClose}
+                  disabled={isSaving}
+                >
+                  <CircleX size={16} />
+                  <span>Cancelar</span>
+                </button>
 
-                <span>
-                  {isSaving
-                    ? "Salvando..."
-                    : "Salvar alterações"}
-                </span>
-              </button>
-            </>
-          )}
+                <button
+                  type="button"
+                  className={
+                    styles.primaryActionButton
+                  }
+                  onClick={handleSave}
+                  disabled={isSaving}
+                >
+                  <Save size={16} />
 
-          {mode === "create" && (
-            <>
-              <button
-                type="button"
-                className={
-                  styles.secondaryActionButton
-                }
-                onClick={onClose}
-                disabled={isSaving}
-              >
-                <CircleX size={16} />
-                <span>Cancelar</span>
-              </button>
-
-              <button
-                type="button"
-                className={
-                  styles.primaryActionButton
-                }
-                onClick={handleSave}
-                disabled={isSaving}
-              >
-                <Save size={16} />
-
-                <span>
-                  {isSaving
-                    ? "Salvando..."
-                    : "Salvar animal"}
-                </span>
-              </button>
-            </>
-          )}
+                  <span>
+                    {isSaving
+                      ? "Salvando..."
+                      : "Salvar animal"}
+                  </span>
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+
+      <OccurrenceModal
+        isOpen={
+          occurrenceModalConfig.isOpen
+        }
+        initialMode={
+          occurrenceModalConfig.initialMode
+        }
+        occurrence={
+          occurrenceModalConfig.occurrence
+        }
+        occurrences={occurrences}
+        animalId={draft.id}
+        animalCastrado={
+          draft.castrado === "Sim"
+        }
+        onClose={
+          handleCloseOccurrenceModal
+        }
+        onSaved={
+          handleOccurrenceSaved
+        }
+        onDeleted={
+          handleOccurrenceDeleted
+        }
+      />
+    </>
   );
 }

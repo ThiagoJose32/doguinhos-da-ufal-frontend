@@ -1,31 +1,32 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.45);
+  z-index: 200;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
-  z-index: 200;
+  background: rgba(15, 23, 42, 0.45);
 }
 
 .modal {
   width: min(1120px, 100%);
   max-height: 92vh;
   overflow-y: auto;
-  background: #ffffff;
-  border-radius: 24px;
   border: 1px solid #d9d9d9;
-  box-shadow: 0 24px 64px rgba(15, 23, 42, 0.16);
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow: 0 24px 64px
+    rgba(15, 23, 42, 0.16);
 }
 
 .header {
-  padding: 22px 24px 18px;
-  border-bottom: 1px solid #e5e7eb;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
+  padding: 22px 24px 18px;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .headerText {
@@ -47,8 +48,8 @@
 
 .title {
   margin: 0;
-  font-size: 1.8rem;
   color: #111827;
+  font-size: 1.8rem;
 }
 
 .headerActions {
@@ -71,21 +72,70 @@
 .closeButton {
   width: 42px;
   height: 42px;
-  border: 1px solid #d9d9d9;
-  border-radius: 12px;
-  background: white;
+  flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  border: 1px solid #d9d9d9;
+  border-radius: 12px;
+  background: white;
   cursor: pointer;
-  flex-shrink: 0;
+}
+
+.tabsBar {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 0 24px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #ffffff;
+}
+
+.tabButton {
+  min-height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 14px;
+  border: none;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: #6b7280;
+  font: inherit;
+  font-size: 0.94rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.tabButton:hover {
+  color: #1f6fc2;
+}
+
+.activeTab {
+  border-bottom-color: #1f6fc2;
+  color: #1f6fc2;
+}
+
+.tabCount {
+  min-width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #e8f1fb;
+  color: #1f6fc2;
+  font-size: 0.75rem;
+  font-weight: 800;
 }
 
 .body {
-  padding: 24px;
   display: grid;
   grid-template-columns: 320px 1fr;
   gap: 24px;
+  padding: 24px;
 }
 
 .leftColumn,
@@ -95,63 +145,60 @@
   gap: 16px;
 }
 
-.card {
-  background: #ffffff;
+.card,
+.adoptionCard {
+  padding: 18px;
   border: 1px solid #d9d9d9;
   border-radius: 18px;
-  padding: 18px;
+  background: #ffffff;
 }
 
 .sectionTitle {
   margin: 0 0 14px;
-  font-size: 1rem;
   color: #111827;
+  font-size: 1rem;
 }
 
 .profileImage {
   width: 100%;
   aspect-ratio: 1 / 1;
+  display: block;
+  border-radius: 14px;
   object-fit: contain;
   background: #f3f4f6;
-  border-radius: 14px;
-  display: block;
 }
 
 .emptyImage {
   width: 100%;
   aspect-ratio: 1 / 1;
-  background: #f3f4f6;
-  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
+  padding: 16px;
+  border-radius: 14px;
+  background: #f3f4f6;
   color: #9ca3af;
   font-weight: 600;
   text-align: center;
-  padding: 16px;
 }
 
 .uploadButton {
-  margin-top: 14px;
+  width: fit-content;
   min-height: 44px;
-  border: 1px dashed #1f6fc2;
-  border-radius: 12px;
-  background: #eef5fc;
-  color: #1f6fc2;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  margin-top: 14px;
   padding: 0 14px;
+  border: 1px dashed #1f6fc2;
+  border-radius: 12px;
+  background: #eef5fc;
+  color: #1f6fc2;
   font-size: 0.92rem;
   font-weight: 700;
   cursor: pointer;
-  width: fit-content;
-}
-
-.uploadButtonDisabled {
-  opacity: 0.55;
-  cursor: not-allowed;
 }
 
 .hiddenInput {
@@ -176,21 +223,21 @@
 }
 
 .label {
+  color: #374151;
   font-size: 0.92rem;
   font-weight: 700;
-  color: #374151;
 }
 
 .input,
 .select,
 .textarea {
   width: 100%;
+  box-sizing: border-box;
   border: 1px solid #d1d5db;
   border-radius: 12px;
   background: #ffffff;
   color: #111827;
   font-size: 0.95rem;
-  box-sizing: border-box;
 }
 
 .input,
@@ -212,42 +259,16 @@
   color: #6b7280;
 }
 
-.fileInputWrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.fileLink {
-  min-height: 46px;
-  border: 1px solid #d1d5db;
-  border-radius: 12px;
-  padding: 0 14px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  width: fit-content;
-  text-decoration: none;
-  color: #1f6fc2;
-  font-weight: 700;
-  background: #f8fafc;
-}
-
-.filePlaceholder {
-  min-height: 46px;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 0 14px;
-  display: flex;
-  align-items: center;
-  color: #9ca3af;
-  background: #f9fafb;
+.inputReadOnly {
+  background: #f3f4f6;
+  color: #4b5563;
 }
 
 .helperText {
+  margin: 0;
   color: #6b7280;
-  font-size: 0.88rem;
-  line-height: 1.4;
+  font-size: 0.82rem;
+  line-height: 1.5;
 }
 
 .errorBox {
@@ -260,24 +281,299 @@
   font-weight: 600;
 }
 
+.adoptionHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.adoptionGrid {
+  display: grid;
+  grid-template-columns: repeat(
+    2,
+    minmax(0, 1fr)
+  );
+  gap: 14px;
+}
+
+.adoptionItem {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 13px 14px;
+  border-radius: 11px;
+  background: #f8fafc;
+}
+
+.adoptionLabel {
+  color: #6b7280;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.adoptionValue {
+  overflow: hidden;
+  color: #374151;
+  font-size: 0.9rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.adoptionActions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.documentButton,
+.occurrenceLinkButton {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 14px;
+  border-radius: 11px;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.documentButton {
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  color: #1f6fc2;
+}
+
+.occurrenceLinkButton {
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #374151;
+}
+
+.documentButton:hover:not(:disabled),
+.occurrenceLinkButton:hover:not(:disabled) {
+  background: #e8f1fb;
+}
+
+.occurrencesBody {
+  padding: 24px;
+}
+
+.occurrencesPanel {
+  padding: 20px;
+  border: 1px solid #d9d9d9;
+  border-radius: 18px;
+  background: #ffffff;
+}
+
+.occurrencesHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.occurrencesTitleGroup {
+  min-width: 0;
+}
+
+.occurrencesTitle {
+  margin: 0 0 6px;
+  color: #111827;
+  font-size: 1.08rem;
+}
+
+.occurrencesSubtitle {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.91rem;
+  line-height: 1.5;
+}
+
+.newOccurrenceButton {
+  min-height: 44px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 11px;
+  background: #1f6fc2;
+  color: #ffffff;
+  font: inherit;
+  font-size: 0.91rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.newOccurrenceButton:hover {
+  background: #175b9f;
+}
+
+.occurrenceList {
+  display: grid;
+  grid-template-columns: repeat(
+    2,
+    minmax(0, 1fr)
+  );
+  gap: 14px;
+}
+
+.occurrenceCard {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background: #ffffff;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.occurrenceCard:hover {
+  border-color: #9fc3e7;
+  box-shadow: 0 8px 20px
+    rgba(15, 23, 42, 0.08);
+  transform: translateY(-1px);
+}
+
+.occurrenceCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.occurrenceTypeBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #e8f1fb;
+  color: #1f6fc2;
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.occurrenceDate {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #6b7280;
+  font-size: 0.81rem;
+  font-weight: 650;
+}
+
+.occurrenceDescription {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0;
+  color: #374151;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.occurrenceMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid #eef2f7;
+}
+
+.occurrenceMetaItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #6b7280;
+  font-size: 0.79rem;
+  font-weight: 650;
+}
+
+.occurrenceState {
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  border: 1px dashed #d1d5db;
+  border-radius: 14px;
+  background: #f8fafc;
+  color: #6b7280;
+  font-weight: 600;
+  text-align: center;
+}
+
+.occurrenceErrorState {
+  min-height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 14px;
+  padding: 24px;
+  border: 1px solid #fecaca;
+  border-radius: 14px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-weight: 600;
+  text-align: center;
+}
+
+.retryOccurrenceButton {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid #dc2626;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #b91c1c;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 .footer {
-  padding: 18px 24px 24px;
-  border-top: 1px solid #e5e7eb;
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 12px;
   flex-wrap: wrap;
+  gap: 12px;
+  padding: 18px 24px 24px;
+  border-top: 1px solid #e5e7eb;
 }
 
 .primaryActionButton,
 .secondaryActionButton {
   height: 46px;
-  border-radius: 12px;
-  padding: 0 16px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  padding: 0 16px;
+  border-radius: 12px;
   font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;
@@ -297,8 +593,8 @@
 
 @media (max-width: 1023px) {
   .overlay {
-    padding: 12px;
     align-items: stretch;
+    padding: 12px;
   }
 
   .modal {
@@ -310,6 +606,10 @@
   .body {
     grid-template-columns: 1fr;
   }
+
+  .occurrenceList {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 768px) {
@@ -318,16 +618,21 @@
   }
 
   .modal {
-    border-radius: 0;
-    max-height: 100vh;
     min-height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
   }
 
   .header,
   .body,
-  .footer {
+  .footer,
+  .occurrencesBody {
     padding-left: 16px;
     padding-right: 16px;
+  }
+
+  .tabsBar {
+    padding: 0 16px;
   }
 
   .body {
@@ -335,8 +640,32 @@
     padding-bottom: 16px;
   }
 
-  .formGrid {
+  .formGrid,
+  .adoptionGrid {
     grid-template-columns: 1fr;
+  }
+
+  .fieldFull {
+    grid-column: auto;
+  }
+
+  .occurrencesHeader {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .newOccurrenceButton {
+    width: 100%;
+  }
+
+  .adoptionActions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .documentButton,
+  .occurrenceLinkButton {
+    width: 100%;
   }
 
   .footer {
@@ -347,5 +676,32 @@
   .secondaryActionButton {
     width: 100%;
     justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .headerActions {
+    align-items: flex-end;
+    flex-direction: column-reverse;
+  }
+
+  .tabsBar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .tabButton {
+    width: 100%;
+    padding: 0 8px;
+  }
+
+  .occurrencesPanel {
+    padding: 16px;
+  }
+
+  .occurrenceCardHeader,
+  .occurrenceMeta {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }

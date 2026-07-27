@@ -1,4 +1,7 @@
 import {
+  getInitials,
+} from "../../utils/avatar";
+import {
   Camera,
   KeyRound,
   Pencil,
@@ -342,11 +345,10 @@ export default function UserModal({
     return null;
   }
 
-  const initial =
-    form.nome
-      .trim()
-      .charAt(0)
-      .toUpperCase() || "U";
+  const initials = getInitials(
+    form.nome,
+    "U"
+  );
 
   function handleFieldChange(event) {
     const {
@@ -684,7 +686,7 @@ export default function UserModal({
                       styles.photoFallback
                     }
                   >
-                    {initial}
+                    {initials}
                   </div>
                 )}
               </div>

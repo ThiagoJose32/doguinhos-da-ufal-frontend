@@ -1,5 +1,9 @@
 import api from "./api";
 
+import {
+  createInitialsAvatar,
+} from "../utils/avatar";
+
 export const ANIMAL_STATUS_OPTIONS = [
   "No campus",
   "Disponível para adoção",
@@ -74,19 +78,27 @@ const PELAGEM_FROM_API = {
 
 const STATUS_TO_API = {
   "No campus": "NO_CAMPUS",
+
   "Disponível para adoção":
     "DISPONIVEL_ADOCAO",
+
   Adotado: "ADOTADO",
+
   Desaparecido: "DESAPARECIDO",
+
   Óbito: "OBITO",
 };
 
 const STATUS_FROM_API = {
   NO_CAMPUS: "No campus",
+
   DISPONIVEL_ADOCAO:
     "Disponível para adoção",
+
   ADOTADO: "Adotado",
+
   DESAPARECIDO: "Desaparecido",
+
   OBITO: "Óbito",
 };
 
@@ -97,7 +109,8 @@ function buildAbsoluteUrl(path) {
 
   if (
     path.startsWith("http://") ||
-    path.startsWith("https://")
+    path.startsWith("https://") ||
+    path.startsWith("data:")
   ) {
     return path;
   }
@@ -195,18 +208,33 @@ function calculateAge(dataNascimento) {
   return "Recém-nascido";
 }
 
-function mapAnimalFromApi(animal) {
-  const fotoUrl = buildAbsoluteUrl(
+function buildAnimalImage(animal) {
+  const photoUrl = buildAbsoluteUrl(
     animal.fotoPerfilUrl
   );
 
+  if (photoUrl) {
+    return `${photoUrl}?v=${Date.now()}`;
+  }
+
+  return createInitialsAvatar(
+    animal.nome,
+    "A"
+  );
+}
+
+function mapAnimalFromApi(animal) {
   return {
     id: animal.id,
+
     nome: animal.nome || "",
 
-    imagem: fotoUrl
-      ? `${fotoUrl}?v=${Date.now()}`
-      : "",
+    /*
+     * Quando houver foto, usa a foto do backend.
+     * Quando não houver, gera uma imagem SVG com
+     * as iniciais do nome do animal.
+     */
+    imagem: buildAnimalImage(animal),
 
     fotoPerfilUrl:
       animal.fotoPerfilUrl || "",
@@ -228,7 +256,8 @@ function mapAnimalFromApi(animal) {
       animal.dataNascimento
     ),
 
-    descricao: animal.descricao || "",
+    descricao:
+      animal.descricao || "",
 
     corPelagem:
       PELAGEM_FROM_API[animal.pelagem] ||
@@ -238,9 +267,10 @@ function mapAnimalFromApi(animal) {
       PORTE_FROM_API[animal.porte] ||
       "Médio",
 
-    castrado: animal.castrado
-      ? "Sim"
-      : "Não",
+    castrado:
+      animal.castrado
+        ? "Sim"
+        : "Não",
 
     status:
       STATUS_FROM_API[animal.status] ||
@@ -248,10 +278,12 @@ function mapAnimalFromApi(animal) {
 
     raca: animal.raca || "",
 
-    adocaoId: animal.adocaoId || null,
+    adocaoId:
+      animal.adocaoId || null,
 
     ocorrenciaAdocaoId:
-      animal.ocorrenciaAdocaoId || null,
+      animal.ocorrenciaAdocaoId ||
+      null,
 
     dataAdocao:
       animal.dataAdocao || "",
@@ -281,7 +313,8 @@ function mapAnimalFromApi(animal) {
 
 function mapAnimalToApi(animal) {
   return {
-    nome: animal.nome.trim(),
+    nome:
+      animal.nome?.trim() || "",
 
     sexo:
       SEXO_TO_API[animal.sexo] ||
@@ -354,14 +387,16 @@ async function downloadAnimalDocument(
     }
   );
 
-  const blobUrl = URL.createObjectURL(
-    response.data
-  );
+  const blobUrl =
+    URL.createObjectURL(
+      response.data
+    );
 
   const link =
     document.createElement("a");
 
   link.href = blobUrl;
+
   link.download =
     filename || "documento.pdf";
 
@@ -436,6 +471,7 @@ export async function downloadAdoptionInterview(
 ) {
   await downloadAnimalDocument(
     `/api/animais/${animal.id}/entrevista-adocao`,
+
     animal.entrevistaAdocaoArquivoNome ||
       `entrevista-adocao-${animal.nome}.pdf`
   );
@@ -446,6 +482,7 @@ export async function downloadAdoptionTerm(
 ) {
   await downloadAnimalDocument(
     `/api/animais/${animal.id}/termo-adocao`,
+
     animal.termoAdocaoArquivoNome ||
       `termo-adocao-${animal.nome}.pdf`
   );

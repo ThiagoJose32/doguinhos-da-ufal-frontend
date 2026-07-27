@@ -1,5 +1,8 @@
 import { Funnel } from "lucide-react";
 import {
+  createInitialsAvatar,
+} from "../../utils/avatar";
+import {
   useEffect,
   useMemo,
   useState,
@@ -637,23 +640,19 @@ export default function VolunteersPage() {
             {filteredVolunteers.map(
               (volunteer) => (
                 <EntityCard
-                  key={volunteer.id}
                   image={
-                    volunteer.fotoUrl
-                  }
-                  title={
-                    volunteer.nome
-                  }
-                  subtitle={getUserSubtitle(
-                    volunteer
-                  )}
-                  status={getUserStatus(
-                    volunteer
-                  )}
-                  onClick={() =>
-                    handleOpenUser(
-                      volunteer
+                    volunteer.imagem ||
+                    volunteer.fotoUrl ||
+                    createInitialsAvatar(
+                      volunteer.nome,
+                      "U"
                     )
+                  }
+                  title={volunteer.nome}
+                  subtitle={volunteer.curso}
+                  status={volunteer.status}
+                  onClick={() =>
+                    handleOpenUser(volunteer)
                   }
                 />
               )

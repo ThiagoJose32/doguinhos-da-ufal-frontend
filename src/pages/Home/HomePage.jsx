@@ -1,6 +1,5 @@
 import {
   useEffect,
-  useMemo,
   useState,
 } from "react";
 
@@ -8,16 +7,18 @@ import { Link } from "react-router-dom";
 
 import {
   ArrowRight,
+  Car,
   ChevronLeft,
   ChevronRight,
   HeartHandshake,
+  Home,
   LogIn,
   MapPin,
+  Package,
   PawPrint,
+  Share2,
   Users,
 } from "lucide-react";
-
-import api from "../../services/api";
 
 import {
   createInitialsAvatar,
@@ -41,21 +42,26 @@ import serviceTosa from "../../assets/figma/Rectangle 19.png";
 import serviceAlimentacao from "../../assets/figma/Rectangle 20.png";
 import serviceCastracao from "../../assets/figma/Rectangle 21.png";
 
-/*
- * Estes são os endpoints atuais da aplicação.
- *
- * Antes de liberar GET /api/usuarios publicamente,
- * confirme que a resposta não expõe e-mail, telefone
- * ou outras informações pessoais.
- *
- * O ideal posteriormente é usar:
- * /api/publico/voluntarios
- */
-const ANIMALS_ENDPOINT = "/api/animais";
-const VOLUNTEERS_ENDPOINT = "/api/usuarios";
+import volMarcelino from "../../assets/volunteers/vol-marcelino.jpg";
+import volThiago from "../../assets/volunteers/vol-thiago.jpg";
+import volVitor from "../../assets/volunteers/vol-vitor.jpg";
+import volDiana from "../../assets/volunteers/vol-diana.jpg";
+import volErika from "../../assets/volunteers/vol-erika.jpg";
+import volKarlla from "../../assets/volunteers/vol-karlla.jpg";
+import volIasmin from "../../assets/volunteers/vol-iasmin.jpg";
+import volJoandeson from "../../assets/volunteers/vol-joandeson.jpg";
+import volVanessa from "../../assets/volunteers/vol-vanessa.jpg";
 
-const MAX_PUBLIC_ANIMALS = 6;
-const MAX_PUBLIC_VOLUNTEERS = 6;
+import catAmarelinho from "../../assets/animals/cat-amarelinho.jpg";
+import catBatman from "../../assets/animals/cat-batman.jpg";
+import catCabecao from "../../assets/animals/cat-cabecao.jpg";
+import catChico from "../../assets/animals/cat-chico.jpg";
+import catCida from "../../assets/animals/cat-cida.jpg";
+import dogCacau from "../../assets/animals/dog-cacau.jpg";
+import dogAlfonso from "../../assets/animals/dog-alfonso.jpg";
+
+const VOLUNTEER_FORM_URL =
+  "https://forms.gle/a4c4W8iu3e7hzq4XA";
 
 const heroSlides = [
   heroImage,
@@ -64,342 +70,233 @@ const heroSlides = [
   heroDog3,
 ];
 
-const projectActivities = [
+const projectStats = [
   {
-    id: "higiene",
-    image: serviceBanho,
-    title: "Higiene e bem-estar",
-    text:
-      "Ações de cuidado ajudam a manter os animais limpos, confortáveis e em melhores condições de saúde.",
+    id: "adotados",
+    value: "+50",
+    label: "animais adotados",
   },
   {
-    id: "acompanhamento",
-    image: serviceTosa,
-    title: "Acompanhamento contínuo",
-    text:
-      "Cada animal pode ter seu histórico registrado, facilitando o acompanhamento das ações realizadas.",
+    id: "tratados",
+    value: "+50",
+    label: "animais tratados",
   },
   {
-    id: "alimentacao",
-    image: serviceAlimentacao,
-    title: "Alimentação",
-    text:
-      "A equipe organiza o fornecimento de alimento e mobiliza a comunidade para apoiar as necessidades do projeto.",
+    id: "castrados",
+    value: "+40",
+    label: "animais castrados",
   },
   {
-    id: "castracao",
-    image: serviceCastracao,
-    title: "Castração e saúde",
-    text:
-      "O acompanhamento veterinário e a castração contribuem para o controle populacional e para a qualidade de vida.",
+    id: "vacinados",
+    value: "+25",
+    label: "animais vacinados",
   },
 ];
 
-function extractArray(data) {
-  if (Array.isArray(data)) {
-    return data;
-  }
-
-  if (Array.isArray(data?.content)) {
-    return data.content;
-  }
-
-  return [];
-}
-
-function buildAbsoluteUrl(path) {
-  if (!path) {
-    return "";
-  }
-
-  if (
-    path.startsWith("http://") ||
-    path.startsWith("https://") ||
-    path.startsWith("data:") ||
-    path.startsWith("blob:")
-  ) {
-    return path;
-  }
-
-  const baseUrl = (
-    api.defaults.baseURL || ""
-  ).replace(/\/$/, "");
-
-  const normalizedPath =
-    path.startsWith("/")
-      ? path
-      : `/${path}`;
-
-  return `${baseUrl}${normalizedPath}`;
-}
-
-function addVersionToUrl(url, version) {
-  if (!url || url.startsWith("data:")) {
-    return url;
-  }
-
-  const separator = url.includes("?")
-    ? "&"
-    : "?";
-
-  return `${url}${separator}v=${version || "1"}`;
-}
-
-function normalizeEnum(value) {
-  return String(value || "")
-    .trim()
-    .toUpperCase()
-    .replaceAll(" ", "_")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
-}
-
-function isAvailableForAdoption(animal) {
-  const status = normalizeEnum(
-    animal?.status
-  );
-
-  return (
-    status === "DISPONIVEL_ADOCAO" ||
-    status === "DISPONIVEL_PARA_ADOCAO"
-  );
-}
-
-function isActiveVolunteer(user) {
-  if (user?.ativo === false) {
-    return false;
-  }
-
-  const status = normalizeEnum(
-    user?.status
-  );
-
-  return (
-    status !== "INATIVO" &&
-    status !== "INACTIVE"
-  );
-}
-
-function formatAnimalSpecies(value) {
-  const normalized =
-    normalizeEnum(value);
-
-  if (
-    normalized === "CACHORRO" ||
-    normalized === "DOG"
-  ) {
-    return "Cachorro";
-  }
-
-  if (
-    normalized === "GATO" ||
-    normalized === "CAT"
-  ) {
-    return "Gato";
-  }
-
-  return "Animal";
-}
-
-function formatAnimalSex(value) {
-  const normalized =
-    normalizeEnum(value);
-
-  if (normalized === "MACHO") {
-    return "Macho";
-  }
-
-  if (
-    normalized === "FEMEA" ||
-    normalized === "FÊMEA"
-  ) {
-    return "Fêmea";
-  }
-
-  return "";
-}
-
-function calculateAge(dateValue) {
-  if (!dateValue) {
-    return "Idade não informada";
-  }
-
-  const birthDate = new Date(
-    `${dateValue}T00:00:00`
-  );
-
-  const today = new Date();
-
-  if (
-    Number.isNaN(birthDate.getTime()) ||
-    birthDate > today
-  ) {
-    return "Idade não informada";
-  }
-
-  let years =
-    today.getFullYear() -
-    birthDate.getFullYear();
-
-  let months =
-    today.getMonth() -
-    birthDate.getMonth();
-
-  if (
-    today.getDate() <
-    birthDate.getDate()
-  ) {
-    months -= 1;
-  }
-
-  if (months < 0) {
-    years -= 1;
-    months += 12;
-  }
-
-  if (years > 0) {
-    return years === 1
-      ? "1 ano"
-      : `${years} anos`;
-  }
-
-  if (months > 0) {
-    return months === 1
-      ? "1 mês"
-      : `${months} meses`;
-  }
-
-  return "Menos de 1 mês";
-}
-
-function normalizeAnimal(animal) {
-  const name =
-    animal?.nome?.trim() ||
-    "Animal sem nome";
-
-  const rawPhoto =
-    animal?.fotoPerfilUrl ||
-    animal?.fotoUrl ||
-    animal?.imagem ||
-    "";
-
-  const photoUrl = buildAbsoluteUrl(
-    rawPhoto
-  );
-
-  return {
-    id:
-      animal?.id ||
-      `${name}-${animal?.dataCriacao || ""}`,
-
-    name,
-
-    photo:
-      photoUrl
-        ? addVersionToUrl(
-            photoUrl,
-            animal?.id
-          )
-        : createInitialsAvatar(
-            name,
-            "A"
-          ),
-
-    species: formatAnimalSpecies(
-      animal?.especie
-    ),
-
-    sex: formatAnimalSex(
-      animal?.sexo
-    ),
-
-    age:
-      animal?.idade ||
-      calculateAge(
-        animal?.dataNascimento ||
-          animal?.dataEstimadaNascimento
-      ),
-
+const projectActions = [
+  {
+    id: "alimentacao",
+    title: "Alimentação",
+    image: serviceAlimentacao,
     description:
-      animal?.descricao?.trim() ||
-      "Este animal está disponível para adoção responsável e aguarda uma nova família.",
-  };
-}
-
-function normalizeVolunteer(user) {
-  const name =
-    user?.nome?.trim() ||
-    "Voluntário";
-
-  const rawPhoto =
-    user?.fotoUrl ||
-    user?.fotoPerfilUrl ||
-    user?.imagem ||
-    "";
-
-  const photoUrl = buildAbsoluteUrl(
-    rawPhoto
-  );
-
-  const profile =
-    normalizeEnum(user?.perfil);
-
-  const role =
-    profile === "ADMIN"
-      ? "Administração do projeto"
-      : "Voluntário(a)";
-
-  return {
-    id:
-      user?.id ||
-      `${name}-${user?.email || ""}`,
-
-    name,
-
-    photo:
-      photoUrl
-        ? addVersionToUrl(
-            photoUrl,
-            user?.id
-          )
-        : createInitialsAvatar(
-            name,
-            "U"
-          ),
-
-    institution:
-      user?.instituicao?.trim() ||
-      user?.universidade?.trim() ||
-      "",
-
-    course:
-      user?.curso?.trim() || "",
-
+      "Organização do fornecimento de ração e mobilização da comunidade para atender às necessidades dos animais.",
+  },
+  {
+    id: "banho",
+    title: "Higiene e bem-estar",
+    image: serviceBanho,
     description:
-      user?.descricao?.trim() ||
-      `${role} do projeto ARA Campus Pets.`,
-  };
-}
+      "Cuidados de higiene que contribuem para o conforto, a saúde e a qualidade de vida dos animais.",
+  },
+  {
+    id: "saude",
+    title: "Acompanhamento de saúde",
+    image: serviceTosa,
+    description:
+      "Apoio em consultas, exames, tratamentos, vacinação e demais cuidados veterinários necessários.",
+  },
+  {
+    id: "adocao",
+    title: "Adoção responsável",
+    image: serviceCastracao,
+    description:
+      "Divulgação e acompanhamento dos animais preparados para encontrar uma família responsável.",
+  },
+];
 
-function getVolunteerSubtitle(
-  volunteer
-) {
-  const details = [
-    volunteer.institution,
-    volunteer.course,
-  ].filter(Boolean);
+const helpOptions = [
+  {
+    id: "materiais",
+    title: "Doe ração e materiais",
+    description:
+      "Ração, produtos de higiene e materiais de cuidado ajudam a manter as atividades do projeto.",
+    Icon: Package,
+  },
+  {
+    id: "carona",
+    title: "Ofereça uma carona",
+    description:
+      "O transporte é importante para consultas, tratamentos, castrações e encaminhamentos para adoção.",
+    Icon: Car,
+  },
+  {
+    id: "lar",
+    title: "Disponibilize um lar temporário",
+    description:
+      "Alguns animais precisam de um local seguro enquanto se recuperam ou aguardam uma adoção definitiva.",
+    Icon: Home,
+  },
+  {
+    id: "divulgacao",
+    title: "Ajude na divulgação",
+    description:
+      "Compartilhar animais, campanhas e necessidades do projeto amplia nossa rede de apoio.",
+    Icon: Share2,
+  },
+];
 
-  return details.length > 0
-    ? details.join(" — ")
-    : "ARA Campus Pets";
-}
+const animals = [
+  {
+    id: 1,
+    name: "Ralf",
+    photo: catAmarelinho,
+    species: "Gato",
+    description:
+      "Aguarda uma família responsável, preparada para oferecer proteção, cuidado e carinho.",
+  },
+  {
+    id: 2,
+    name: "Belinha",
+    photo: catBatman,
+    species: "Gato",
+    description:
+      "Procura um novo lar onde possa receber atenção, segurança e acompanhamento responsável.",
+  },
+  {
+    id: 3,
+    name: "Samanta",
+    photo: catCabecao,
+    species: "Gato",
+    description:
+      "Está disponível para adoção responsável e pode se tornar uma nova companheira para sua família.",
+  },
+  {
+    id: 4,
+    name: "Theodoro",
+    photo: catChico,
+    species: "Gato",
+    description:
+      "Aguarda uma oportunidade de viver em um ambiente protegido, acolhedor e cheio de cuidado.",
+  },
+  {
+    id: 5,
+    name: "Cidinha",
+    photo: catCida,
+    species: "Gato",
+    description:
+      "Está à procura de uma família comprometida com uma adoção consciente e responsável.",
+  },
+  {
+    id: 6,
+    name: "Cacau",
+    photo: dogCacau,
+    species: "Cachorro",
+    description:
+      "Aguarda uma nova família que possa oferecer carinho, segurança e os cuidados necessários.",
+  },
+  {
+    id: 7,
+    name: "Alfonso",
+    photo: dogAlfonso,
+    species: "Cachorro",
+    description:
+      "Está disponível para adoção responsável e pronto para receber uma nova oportunidade.",
+  },
+];
+
+const team = [
+  {
+    id: 1,
+    name: "Marcelino Ferreira",
+    photo: volMarcelino,
+    role: "Voluntário",
+  },
+  {
+    id: 2,
+    name: "Thiago Almeida",
+    photo: volThiago,
+    role: "Voluntário",
+  },
+  {
+    id: 3,
+    name: "Vitor Santos",
+    photo: volVitor,
+    role: "Voluntário",
+  },
+  {
+    id: 4,
+    name: "Diana Oliveira",
+    photo: volDiana,
+    role: "Voluntária",
+  },
+  {
+    id: 5,
+    name: "Érika Lima",
+    photo: volErika,
+    role: "Voluntária",
+  },
+  {
+    id: 6,
+    name: "Karlla Souza",
+    photo: volKarlla,
+    role: "Voluntária",
+  },
+  {
+    id: 7,
+    name: "Iasmin Rocha",
+    photo: volIasmin,
+    role: "Voluntária",
+  },
+  {
+    id: 8,
+    name: "Joandeson Silva",
+    photo: volJoandeson,
+    role: "Voluntário",
+  },
+  {
+    id: 9,
+    name: "Vanessa Costa",
+    photo: volVanessa,
+    role: "Voluntária",
+  },
+];
+
+const partners = [
+  {
+    id: "gustavo-rocha",
+    name: "Centro Veterinário Gustavo Rocha",
+    description:
+      "Parceiro nas ações relacionadas ao atendimento e aos cuidados veterinários.",
+  },
+  {
+    id: "grupequi",
+    name: "GRUPEQUI",
+    description:
+      "Grupo de Pesquisa e Extensão em Equídeos e Saúde Integrativa da UFAL.",
+  },
+  {
+    id: "andre-pepes",
+    name: "André Pepes",
+    description:
+      "Apoiador e colaborador na divulgação das ações desenvolvidas pelo projeto.",
+  },
+];
 
 function ImageWithFallback({
   src,
   alt,
   name,
   fallback = "A",
-  className,
 }) {
   function handleError(event) {
     event.currentTarget.onerror = null;
@@ -415,7 +312,6 @@ function ImageWithFallback({
     <img
       src={src}
       alt={alt}
-      className={className}
       onError={handleError}
       loading="lazy"
     />
@@ -427,16 +323,14 @@ function HeroSlider() {
     useState(0);
 
   useEffect(() => {
-    const intervalId = window.setInterval(
-      () => {
+    const intervalId =
+      window.setInterval(() => {
         setIndex(
           (currentIndex) =>
             (currentIndex + 1) %
             heroSlides.length
         );
-      },
-      5000
-    );
+      }, 5000);
 
     return () => {
       window.clearInterval(intervalId);
@@ -488,16 +382,15 @@ function HeroSlider() {
         </span>
 
         <h1 className={styles.heroTitle}>
-          Cuidado, informação e novas
-          oportunidades para os animais
-          do Campus Arapiraca
+          Transformando vidas, uma pata
+          de cada vez
         </h1>
 
         <p className={styles.heroText}>
-          Conheça o projeto, acompanhe os
-          animais disponíveis para adoção
-          e descubra como a comunidade pode
-          contribuir.
+          Cuidado, acompanhamento e novas
+          oportunidades para os animais
+          do Campus Arapiraca e de seu
+          entorno.
         </p>
 
         <div className={styles.heroActions}>
@@ -512,12 +405,12 @@ function HeroSlider() {
           </a>
 
           <a
-            href="#projeto"
+            href="#ajude"
             className={
               styles.secondaryButton
             }
           >
-            Saiba mais
+            Saiba como ajudar
             <ArrowRight size={18} />
           </a>
         </div>
@@ -608,180 +501,7 @@ function SectionTitle({
   );
 }
 
-function LoadingCards({
-  count = 3,
-}) {
-  return (
-    <div className={styles.loadingGrid}>
-      {Array.from({
-        length: count,
-      }).map((_, index) => (
-        <div
-          key={index}
-          className={styles.loadingCard}
-        >
-          <div
-            className={
-              styles.loadingImage
-            }
-          />
-
-          <div
-            className={
-              styles.loadingContent
-            }
-          >
-            <div
-              className={
-                styles.loadingLineLarge
-              }
-            />
-
-            <div
-              className={
-                styles.loadingLine
-              }
-            />
-
-            <div
-              className={
-                styles.loadingLineSmall
-              }
-            />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 export default function HomePage() {
-  const [animals, setAnimals] =
-    useState([]);
-
-  const [volunteers, setVolunteers] =
-    useState([]);
-
-  const [
-    animalsLoading,
-    setAnimalsLoading,
-  ] = useState(true);
-
-  const [
-    volunteersLoading,
-    setVolunteersLoading,
-  ] = useState(true);
-
-  const [
-    animalsError,
-    setAnimalsError,
-  ] = useState("");
-
-  const [
-    volunteersError,
-    setVolunteersError,
-  ] = useState("");
-
-  useEffect(() => {
-    let active = true;
-
-    async function loadPublicData() {
-      const [
-        animalsResult,
-        volunteersResult,
-      ] = await Promise.allSettled([
-        api.get(ANIMALS_ENDPOINT),
-        api.get(VOLUNTEERS_ENDPOINT),
-      ]);
-
-      if (!active) {
-        return;
-      }
-
-      if (
-        animalsResult.status ===
-        "fulfilled"
-      ) {
-        const availableAnimals =
-          extractArray(
-            animalsResult.value.data
-          )
-            .filter(
-              isAvailableForAdoption
-            )
-            .map(normalizeAnimal)
-            .sort((first, second) =>
-              first.name.localeCompare(
-                second.name,
-                "pt-BR"
-              )
-            );
-
-        setAnimals(availableAnimals);
-      } else {
-        setAnimalsError(
-          "Não foi possível carregar os animais disponíveis neste momento."
-        );
-      }
-
-      setAnimalsLoading(false);
-
-      if (
-        volunteersResult.status ===
-        "fulfilled"
-      ) {
-        const activeVolunteers =
-          extractArray(
-            volunteersResult.value.data
-          )
-            .filter(isActiveVolunteer)
-            .map(normalizeVolunteer)
-            .sort((first, second) =>
-              first.name.localeCompare(
-                second.name,
-                "pt-BR"
-              )
-            );
-
-        setVolunteers(
-          activeVolunteers
-        );
-      } else {
-        setVolunteersError(
-          "Não foi possível carregar a equipe do projeto neste momento."
-        );
-      }
-
-      setVolunteersLoading(false);
-    }
-
-    loadPublicData();
-
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const visibleAnimals =
-    useMemo(
-      () =>
-        animals.slice(
-          0,
-          MAX_PUBLIC_ANIMALS
-        ),
-      [animals]
-    );
-
-  const visibleVolunteers =
-    useMemo(
-      () =>
-        volunteers.slice(
-          0,
-          MAX_PUBLIC_VOLUNTEERS
-        ),
-      [volunteers]
-    );
-
   return (
     <div className={styles.page}>
       <header className={styles.header}>
@@ -796,11 +516,7 @@ export default function HomePage() {
               alt="ARA Campus Pets"
             />
 
-            <div
-              className={
-                styles.brandText
-              }
-            >
+            <div className={styles.brandText}>
               <strong>
                 ARA Campus Pets
               </strong>
@@ -819,6 +535,14 @@ export default function HomePage() {
               O projeto
             </a>
 
+            <a href="#acoes">
+              Ações
+            </a>
+
+            <a href="#ajude">
+              Como ajudar
+            </a>
+
             <a href="#adocao">
               Adoção
             </a>
@@ -832,7 +556,10 @@ export default function HomePage() {
               className={styles.loginLink}
             >
               <LogIn size={17} />
-              Área do voluntário
+
+              <span>
+                Área do voluntário
+              </span>
             </Link>
           </nav>
         </div>
@@ -852,20 +579,20 @@ export default function HomePage() {
         >
           <SectionTitle
             eyebrow="Sobre o projeto"
-            description="Uma iniciativa dedicada ao cuidado, ao acompanhamento e à busca por soluções responsáveis para os animais que vivem no Campus Arapiraca e em seu entorno."
+            description="Uma iniciativa dedicada ao bem-estar e ao acompanhamento dos animais comunitários do Campus Arapiraca e de seu entorno."
           >
-            Nossa visão
+            Visão geral e missão
           </SectionTitle>
 
-          <div className={styles.visionGrid}>
+          <div className={styles.aboutGrid}>
             <div
               className={
-                styles.visionImageWrapper
+                styles.aboutImageWrapper
               }
             >
               <div
                 className={
-                  styles.visionImage
+                  styles.aboutImage
                 }
               >
                 <img
@@ -876,7 +603,7 @@ export default function HomePage() {
 
               <div
                 className={
-                  styles.visionBadge
+                  styles.aboutBadge
                 }
               >
                 <HeartHandshake
@@ -889,169 +616,220 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div
-              className={
-                styles.visionContent
-              }
-            >
+            <div className={styles.aboutContent}>
               <h3>
-                Informação que fortalece o
-                cuidado
+                Cuidar, conscientizar e
+                encontrar novos lares
               </h3>
 
               <p>
                 O ARA Campus Pets reúne
-                voluntários e apoiadores em
-                ações de alimentação, manejo,
-                acompanhamento da saúde,
-                castração e adoção responsável
-                de animais que circulam pelo
-                Campus Arapiraca.
+                voluntários, apoiadores e
+                membros da comunidade em
+                ações de alimentação,
+                cuidados básicos,
+                acompanhamento de saúde,
+                castração e adoção
+                responsável.
               </p>
 
               <p>
-                A plataforma foi criada para
-                centralizar o histórico dos
-                animais, registrar as ações
-                realizadas e facilitar o acesso
-                da comunidade às informações
-                sobre aqueles que estão
-                disponíveis para adoção.
+                O projeto também busca
+                conscientizar a comunidade
+                sobre abandono, bem-estar
+                animal e convivência
+                responsável entre pessoas e
+                animais.
               </p>
 
-              <p>
-                Com registros organizados, a
-                equipe consegue preservar a
-                memória do projeto, acompanhar
-                cada animal e tomar decisões
-                com mais segurança.
-              </p>
+              <div className={styles.missionCard}>
+                <strong>Nossa missão</strong>
+
+                <p>
+                  Promover dignidade e
+                  qualidade de vida aos
+                  animais, reduzir situações
+                  de abandono e ampliar as
+                  oportunidades de adoção
+                  responsável.
+                </p>
+              </div>
             </div>
           </div>
         </section>
 
+        <section className={styles.statsSection}>
+          <div className={styles.statsInner}>
+            <div className={styles.statsGrid}>
+              {projectStats.map((stat) => (
+                <article
+                  key={stat.id}
+                  className={styles.statCard}
+                >
+                  <strong
+                    className={
+                      styles.statValue
+                    }
+                  >
+                    {stat.value}
+                  </strong>
+
+                  <span
+                    className={
+                      styles.statLabel
+                    }
+                  >
+                    {stat.label}
+                  </span>
+                </article>
+              ))}
+            </div>
+
+            <p className={styles.statsNote}>
+              Dados históricos divulgados
+              pelo projeto. As informações
+              serão atualizadas futuramente
+              na nova plataforma.
+            </p>
+          </div>
+        </section>
+
         <section
-          className={
-            styles.communitySection
-          }
+          id="acoes"
+          className={styles.section}
         >
-          <div
-            className={
-              styles.communityInner
-            }
+          <SectionTitle
+            eyebrow="Nossa atuação"
+            description="As ações do projeto se complementam para oferecer um acompanhamento mais responsável aos animais."
           >
+            Principais ações
+          </SectionTitle>
+
+          <div className={styles.actionsGrid}>
+            {projectActions.map(
+              (action) => (
+                <article
+                  key={action.id}
+                  className={
+                    styles.actionCard
+                  }
+                >
+                  <div
+                    className={
+                      styles.actionImage
+                    }
+                  >
+                    <img
+                      src={action.image}
+                      alt=""
+                      loading="lazy"
+                    />
+                  </div>
+
+                  <div
+                    className={
+                      styles.actionContent
+                    }
+                  >
+                    <h3>{action.title}</h3>
+
+                    <p>
+                      {action.description}
+                    </p>
+                  </div>
+                </article>
+              )
+            )}
+          </div>
+        </section>
+
+        <section
+          id="ajude"
+          className={styles.helpSection}
+        >
+          <div className={styles.helpInner}>
             <SectionTitle
               eyebrow="Participe"
-              description="A participação da comunidade amplia a capacidade do projeto de cuidar dos animais e encontrar famílias responsáveis."
+              description="Existem diferentes maneiras de contribuir com o cuidado e o acompanhamento dos animais."
             >
-              Faça parte dessa rede
+              Como você pode ajudar
             </SectionTitle>
+
+            <div className={styles.helpGrid}>
+              {helpOptions.map((option) => {
+                const Icon = option.Icon;
+
+                return (
+                  <article
+                    key={option.id}
+                    className={styles.helpCard}
+                  >
+                    <div
+                      className={
+                        styles.helpIcon
+                      }
+                    >
+                      <Icon size={25} />
+                    </div>
+
+                    <h3>{option.title}</h3>
+
+                    <p>
+                      {option.description}
+                    </p>
+                  </article>
+                );
+              })}
+            </div>
 
             <div
               className={
-                styles.communityGrid
+                styles.volunteerPanel
               }
             >
               <div
                 className={
-                  styles.communityContent
+                  styles.volunteerPanelIcon
                 }
               >
+                <Users size={32} />
+              </div>
+
+              <div
+                className={
+                  styles.volunteerPanelContent
+                }
+              >
+                <span>
+                  Seja voluntário
+                </span>
+
                 <h3>
-                  Por que apoiar o projeto?
+                  Dedique um pouco do seu
+                  tempo e faça a diferença
                 </h3>
 
-                <ul
-                  className={
-                    styles.volunteerList
-                  }
-                >
-                  <li>
-                    Contribuir com o bem-estar
-                    dos animais que vivem no
-                    campus e em seu entorno.
-                  </li>
-
-                  <li>
-                    Apoiar campanhas de
-                    alimentação, castração,
-                    cuidados de saúde e adoção.
-                  </li>
-
-                  <li>
-                    Ajudar na divulgação dos
-                    animais que aguardam uma
-                    família.
-                  </li>
-
-                  <li>
-                    Participar de uma iniciativa
-                    coletiva que aproxima
-                    estudantes, servidores e
-                    comunidade externa.
-                  </li>
-                </ul>
-
-                <a
-                  href="#equipe"
-                  className={
-                    styles.outlineButton
-                  }
-                >
-                  Conheça os voluntários
-                  <ArrowRight size={18} />
-                </a>
+                <p>
+                  Os voluntários ajudam nos
+                  cuidados básicos, na
+                  divulgação, na organização
+                  de recursos e no
+                  acompanhamento das
+                  atividades do projeto.
+                </p>
               </div>
 
-              <div className={styles.statsGrid}>
-                <article
-                  className={styles.statCard}
-                >
-                  <div
-                    className={
-                      styles.statIcon
-                    }
-                  >
-                    <PawPrint size={25} />
-                  </div>
-
-                  <strong>
-                    {animalsLoading
-                      ? "—"
-                      : animals.length}
-                  </strong>
-
-                  <span>
-                    {animals.length === 1
-                      ? "animal disponível para adoção"
-                      : "animais disponíveis para adoção"}
-                  </span>
-                </article>
-
-                <article
-                  className={styles.statCard}
-                >
-                  <div
-                    className={
-                      styles.statIcon
-                    }
-                  >
-                    <Users size={25} />
-                  </div>
-
-                  <strong>
-                    {volunteersLoading
-                      ? "—"
-                      : volunteers.length}
-                  </strong>
-
-                  <span>
-                    {volunteers.length === 1
-                      ? "voluntário ativo"
-                      : "voluntários ativos"}
-                  </span>
-                </article>
-              </div>
+              <a
+                href={VOLUNTEER_FORM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={
+                  styles.volunteerButton
+                }
+              >
+                Quero ser voluntário
+                <ArrowRight size={18} />
+              </a>
             </div>
           </div>
         </section>
@@ -1062,350 +840,159 @@ export default function HomePage() {
         >
           <SectionTitle
             eyebrow="Adoção responsável"
-            description="Conheça alguns dos animais que estão aguardando uma oportunidade de receber cuidado, proteção e um novo lar."
+            description="Conheça alguns dos animais que aguardam uma oportunidade de receber cuidado, proteção e um novo lar."
           >
-            Animais disponíveis
+            Adote nossos animais
           </SectionTitle>
 
-          {animalsLoading && (
-            <LoadingCards count={3} />
-          )}
-
-          {!animalsLoading &&
-            animalsError && (
-              <div
-                className={
-                  styles.feedbackBox
-                }
-                role="alert"
+          <div className={styles.animalGrid}>
+            {animals.map((animal) => (
+              <article
+                key={animal.id}
+                className={styles.animalCard}
               >
-                {animalsError}
-              </div>
-            )}
-
-          {!animalsLoading &&
-            !animalsError &&
-            visibleAnimals.length ===
-              0 && (
-              <div
-                className={
-                  styles.emptyState
-                }
-              >
-                <PawPrint size={34} />
-
-                <h3>
-                  Nenhum animal disponível
-                  neste momento
-                </h3>
-
-                <p>
-                  Novos animais aparecerão aqui
-                  quando estiverem disponíveis
-                  para adoção.
-                </p>
-              </div>
-            )}
-
-          {!animalsLoading &&
-            !animalsError &&
-            visibleAnimals.length >
-              0 && (
-              <>
                 <div
                   className={
-                    styles.animalGrid
+                    styles.animalPhoto
                   }
                 >
-                  {visibleAnimals.map(
-                    (animal) => (
-                      <article
-                        key={animal.id}
-                        className={
-                          styles.animalCard
-                        }
-                      >
-                        <div
-                          className={
-                            styles.animalPhoto
-                          }
-                        >
-                          <ImageWithFallback
-                            src={animal.photo}
-                            alt={`Foto de ${animal.name}`}
-                            name={animal.name}
-                            fallback="A"
-                          />
+                  <ImageWithFallback
+                    src={animal.photo}
+                    alt={`Foto de ${animal.name}`}
+                    name={animal.name}
+                    fallback="A"
+                  />
 
-                          <span
-                            className={
-                              styles.availableBadge
-                            }
-                          >
-                            Disponível para
-                            adoção
-                          </span>
-                        </div>
-
-                        <div
-                          className={
-                            styles.animalContent
-                          }
-                        >
-                          <h3
-                            className={
-                              styles.animalName
-                            }
-                          >
-                            {animal.name}
-                          </h3>
-
-                          <p
-                            className={
-                              styles.animalMeta
-                            }
-                          >
-                            {[
-                              animal.species,
-                              animal.sex,
-                              animal.age,
-                            ]
-                              .filter(Boolean)
-                              .join(" • ")}
-                          </p>
-
-                          <p
-                            className={
-                              styles.animalDescription
-                            }
-                          >
-                            {animal.description}
-                          </p>
-                        </div>
-                      </article>
-                    )
-                  )}
-                </div>
-
-                {animals.length >
-                  MAX_PUBLIC_ANIMALS && (
-                  <p
+                  <span
                     className={
-                      styles.sectionFootnote
+                      styles.availableBadge
                     }
                   >
-                    Exibindo{" "}
-                    {MAX_PUBLIC_ANIMALS} de{" "}
-                    {animals.length} animais
-                    disponíveis.
-                  </p>
-                )}
-              </>
-            )}
-        </section>
-
-        <section
-          id="equipe"
-          className={
-            styles.teamSection
-          }
-        >
-          <div
-            className={
-              styles.teamSectionInner
-            }
-          >
-            <SectionTitle
-              eyebrow="Pessoas que fazem acontecer"
-              description="O projeto é construído diariamente por pessoas que compartilham responsabilidades, conhecimento e cuidado."
-            >
-              Nossa equipe
-            </SectionTitle>
-
-            {volunteersLoading && (
-              <LoadingCards count={3} />
-            )}
-
-            {!volunteersLoading &&
-              volunteersError && (
-                <div
-                  className={
-                    styles.feedbackBox
-                  }
-                  role="alert"
-                >
-                  {volunteersError}
+                    Disponível para adoção
+                  </span>
                 </div>
-              )}
 
-            {!volunteersLoading &&
-              !volunteersError &&
-              visibleVolunteers.length ===
-                0 && (
                 <div
                   className={
-                    styles.emptyState
+                    styles.animalContent
                   }
                 >
-                  <Users size={34} />
-
-                  <h3>
-                    Equipe ainda não
-                    cadastrada
+                  <h3
+                    className={
+                      styles.animalName
+                    }
+                  >
+                    {animal.name}
                   </h3>
 
-                  <p>
-                    Os voluntários ativos serão
-                    apresentados nesta seção.
-                  </p>
-                </div>
-              )}
-
-            {!volunteersLoading &&
-              !volunteersError &&
-              visibleVolunteers.length >
-                0 && (
-                <>
-                  <div
+                  <span
                     className={
-                      styles.teamGrid
+                      styles.animalSpecies
                     }
                   >
-                    {visibleVolunteers.map(
-                      (member) => (
-                        <article
-                          key={member.id}
-                          className={
-                            styles.teamCard
-                          }
-                        >
-                          <div
-                            className={
-                              styles.teamPhoto
-                            }
-                          >
-                            <ImageWithFallback
-                              src={member.photo}
-                              alt={`Foto de ${member.name}`}
-                              name={member.name}
-                              fallback="U"
-                            />
-                          </div>
+                    {animal.species}
+                  </span>
 
-                          <div
-                            className={
-                              styles.teamContent
-                            }
-                          >
-                            <h3
-                              className={
-                                styles.teamName
-                              }
-                            >
-                              {member.name}
-                            </h3>
-
-                            <span
-                              className={
-                                styles.teamRole
-                              }
-                            >
-                              {getVolunteerSubtitle(
-                                member
-                              )}
-                            </span>
-
-                            <p
-                              className={
-                                styles.teamText
-                              }
-                            >
-                              {member.description}
-                            </p>
-                          </div>
-                        </article>
-                      )
-                    )}
-                  </div>
-
-                  {volunteers.length >
-                    MAX_PUBLIC_VOLUNTEERS && (
-                    <p
-                      className={
-                        styles.sectionFootnote
-                      }
-                    >
-                      Exibindo{" "}
-                      {MAX_PUBLIC_VOLUNTEERS} de{" "}
-                      {volunteers.length}{" "}
-                      voluntários ativos.
-                    </p>
-                  )}
-                </>
-              )}
+                  <p
+                    className={
+                      styles.animalDescription
+                    }
+                  >
+                    {animal.description}
+                  </p>
+                </div>
+              </article>
+            ))}
           </div>
         </section>
 
         <section
-          className={styles.section}
+          id="equipe"
+          className={styles.teamSection}
         >
-          <SectionTitle
-            eyebrow="Atuação"
-            description="O trabalho do projeto envolve diferentes frentes que se complementam para oferecer um acompanhamento mais responsável."
-          >
-            O que fazemos
-          </SectionTitle>
+          <div className={styles.teamInner}>
+            <SectionTitle
+              eyebrow="Pessoas que fazem acontecer"
+              description="O projeto é construído por pessoas que compartilham responsabilidades, conhecimento e cuidado."
+            >
+              Nossa equipe
+            </SectionTitle>
 
-          <div
-            className={
-              styles.activityGrid
-            }
-          >
-            {projectActivities.map(
-              (activity) => (
+            <div className={styles.teamGrid}>
+              {team.map((member) => (
                 <article
-                  key={activity.id}
-                  className={
-                    styles.activityCard
-                  }
+                  key={member.id}
+                  className={styles.teamCard}
                 >
                   <div
                     className={
-                      styles.activityImage
+                      styles.teamPhoto
                     }
                   >
-                    <img
-                      src={activity.image}
-                      alt=""
-                      loading="lazy"
+                    <ImageWithFallback
+                      src={member.photo}
+                      alt={`Foto de ${member.name}`}
+                      name={member.name}
+                      fallback="U"
                     />
                   </div>
 
                   <div
                     className={
-                      styles.activityContent
+                      styles.teamContent
                     }
                   >
-                    <h3>
-                      {activity.title}
-                    </h3>
+                    <h3>{member.name}</h3>
 
-                    <p>{activity.text}</p>
+                    <span>
+                      {member.role}
+                    </span>
                   </div>
                 </article>
-              )
-            )}
+              ))}
+            </div>
           </div>
         </section>
 
         <section
-          className={styles.finalCta}
+          id="parceiros"
+          className={styles.section}
         >
-          <div
-            className={
-              styles.finalCtaInner
-            }
+          <SectionTitle
+            eyebrow="Rede de apoio"
+            description="O trabalho do projeto é fortalecido pela colaboração de instituições, profissionais e apoiadores."
           >
+            Parceiros e apoiadores
+          </SectionTitle>
+
+          <div className={styles.partnersGrid}>
+            {partners.map((partner) => (
+              <article
+                key={partner.id}
+                className={styles.partnerCard}
+              >
+                <div
+                  className={
+                    styles.partnerIcon
+                  }
+                >
+                  <HeartHandshake
+                    size={27}
+                  />
+                </div>
+
+                <h3>{partner.name}</h3>
+
+                <p>
+                  {partner.description}
+                </p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className={styles.finalCta}>
+          <div className={styles.finalCtaInner}>
             <div>
               <span
                 className={
@@ -1423,7 +1010,7 @@ export default function HomePage() {
                 Acesse a plataforma para
                 cadastrar animais, registrar
                 ocorrências e consultar o
-                histórico do projeto.
+                histórico das atividades.
               </p>
             </div>
 
@@ -1440,21 +1027,10 @@ export default function HomePage() {
         </section>
       </main>
 
-      <footer
-        id="contato"
-        className={styles.footer}
-      >
+      <footer className={styles.footer}>
         <div className={styles.footerInner}>
-          <div
-            className={
-              styles.footerBrand
-            }
-          >
-            <div
-              className={
-                styles.footerLogo
-              }
-            >
+          <div className={styles.footerBrand}>
+            <div className={styles.footerLogo}>
               <img
                 src={petLogo}
                 alt="ARA Campus Pets"
@@ -1469,8 +1045,8 @@ export default function HomePage() {
               <p>
                 Ações de manejo e
                 acompanhamento dos animais
-                errantes do Campus Arapiraca e
-                entorno.
+                comunitários do Campus
+                Arapiraca e entorno.
               </p>
             </div>
           </div>
@@ -1482,11 +1058,17 @@ export default function HomePage() {
           >
             <strong>Navegação</strong>
 
-            <nav
-              className={styles.footerNav}
-            >
+            <nav className={styles.footerNav}>
               <a href="#projeto">
                 O projeto
+              </a>
+
+              <a href="#acoes">
+                Principais ações
+              </a>
+
+              <a href="#ajude">
+                Como ajudar
               </a>
 
               <a href="#adocao">
@@ -1496,10 +1078,6 @@ export default function HomePage() {
               <a href="#equipe">
                 Equipe
               </a>
-
-              <Link to="/login">
-                Área do voluntário
-              </Link>
             </nav>
           </div>
 

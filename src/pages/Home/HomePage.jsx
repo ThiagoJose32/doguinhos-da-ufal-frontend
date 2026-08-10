@@ -35,20 +35,18 @@ import heroDog2 from "../../assets/figma/dog2.jpeg";
 import heroDog3 from "../../assets/figma/dog3.jpg";
 
 import partnersLogo from "../../assets/figma/image 5.png";
-import visionDog from "../../assets/animals/dog-laika.jpg";
+import visionDog from "../../assets/animals/dog-mel.png";
 
-import serviceBanho from "../../assets/figma/Rectangle 18.png";
-import serviceTosa from "../../assets/figma/Rectangle 19.png";
-import serviceAlimentacao from "../../assets/figma/Rectangle 20.png";
-import serviceCastracao from "../../assets/figma/Rectangle 21.png";
+import serviceBanho from "../../assets/figma/banho.png";
+import serviceTosa from "../../assets/figma/saude.png";
+import serviceAlimentacao from "../../assets/figma/alimentacao.png";
+import serviceCastracao from "../../assets/figma/adocao.png";
 
-import volMarcelino from "../../assets/volunteers/vol-marcelino.jpg";
+import volDefault from "../../assets/volunteers/vol-default.png";
 import volThiago from "../../assets/volunteers/vol-thiago.jpg";
-import volVitor from "../../assets/volunteers/vol-vitor.jpg";
 import volDiana from "../../assets/volunteers/vol-diana.jpg";
 import volErika from "../../assets/volunteers/vol-erika.jpg";
 import volKarlla from "../../assets/volunteers/vol-karlla.jpg";
-import volIasmin from "../../assets/volunteers/vol-iasmin.jpg";
 import volJoandeson from "../../assets/volunteers/vol-joandeson.jpg";
 import volVanessa from "../../assets/volunteers/vol-vanessa.jpg";
 
@@ -217,57 +215,45 @@ const animals = [
 const team = [
   {
     id: 1,
-    name: "Marcelino Ferreira",
-    photo: volMarcelino,
-    role: "Voluntário",
-  },
-  {
-    id: 2,
-    name: "Thiago Almeida",
-    photo: volThiago,
-    role: "Voluntário",
-  },
-  {
-    id: 3,
-    name: "Vitor Santos",
-    photo: volVitor,
-    role: "Voluntário",
-  },
-  {
-    id: 4,
-    name: "Diana Oliveira",
+    name: "Diana",
     photo: volDiana,
     role: "Voluntária",
   },
   {
-    id: 5,
-    name: "Érika Lima",
+    id: 2,
+    name: "Erick",
+    photo: volDefault,
+    role: "Voluntário",
+  },
+  {
+    id: 3,
+    name: "Erika",
     photo: volErika,
     role: "Voluntária",
   },
   {
-    id: 6,
-    name: "Karlla Souza",
-    photo: volKarlla,
-    role: "Voluntária",
-  },
-  {
-    id: 7,
-    name: "Iasmin Rocha",
-    photo: volIasmin,
-    role: "Voluntária",
-  },
-  {
-    id: 8,
-    name: "Joandeson Silva",
+    id: 4,
+    name: "Joandeson",
     photo: volJoandeson,
     role: "Voluntário",
   },
   {
-    id: 9,
-    name: "Vanessa Costa",
-    photo: volVanessa,
+    id: 5,
+    name: "Karlla",
+    photo: volKarlla,
     role: "Voluntária",
+  },
+  {
+    id: 6,
+    name: "Mariana",
+    photo: volDefault,
+    role: "Voluntária",
+  },
+  {
+    id: 7,
+    name: "Thiago",
+    photo: volThiago,
+    role: "Voluntário",
   },
 ];
 
@@ -988,41 +974,6 @@ export default function HomePage() {
                 </p>
               </article>
             ))}
-          </div>
-        </section>
-
-        <section className={styles.finalCta}>
-          <div className={styles.finalCtaInner}>
-            <div>
-              <span
-                className={
-                  styles.finalCtaTag
-                }
-              >
-                Área interna
-              </span>
-
-              <h2>
-                Já faz parte da equipe?
-              </h2>
-
-              <p>
-                Acesse a plataforma para
-                cadastrar animais, registrar
-                ocorrências e consultar o
-                histórico das atividades.
-              </p>
-            </div>
-
-            <Link
-              to="/login"
-              className={
-                styles.finalCtaButton
-              }
-            >
-              <LogIn size={19} />
-              Entrar na plataforma
-            </Link>
           </div>
         </section>
       </main>

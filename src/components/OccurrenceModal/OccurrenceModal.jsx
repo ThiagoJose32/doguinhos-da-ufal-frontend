@@ -12,7 +12,6 @@ import {
 
 import {
   useEffect,
-  useMemo,
   useState,
 } from "react";
 
@@ -21,8 +20,6 @@ import {
   deleteOccurrence,
   downloadOccurrenceDocument,
   getOccurrenceTypeLabel,
-  isProtectedOccurrence,
-  isTerminalOccurrence,
   OCCURRENCE_TYPE_OPTIONS,
   updateOccurrence,
 } from "../../services/occurrenceService";
@@ -74,8 +71,6 @@ function normalizeAdoption(adoption) {
   return {
     ...EMPTY_ADOPTION,
     ...(adoption || {}),
-    entrevistaArquivo: null,
-    termoArquivo: null,
   };
 }
 
@@ -111,24 +106,6 @@ function normalizeOccurrence(
   };
 }
 
-function formatDate(value) {
-  if (!value) {
-    return "Data não informada";
-  }
-
-  const date = new Date(
-    `${value}T00:00:00`
-  );
-
-  if (Number.isNaN(date.getTime())) {
-    return "Data não informada";
-  }
-
-  return date.toLocaleDateString(
-    "pt-BR"
-  );
-}
-
 function formatDateTime(value) {
   if (!value) {
     return "Não informado";
@@ -140,9 +117,7 @@ function formatDateTime(value) {
     return "Não informado";
   }
 
-  return date.toLocaleString(
-    "pt-BR"
-  );
+  return date.toLocaleString("pt-BR");
 }
 
 function getErrorMessage(error) {
@@ -201,7 +176,10 @@ function validateCost(value) {
       normalizedValue
     )
   ) {
-    return "Informe um custo válido com no máximo duas casas decimais.";
+    return (
+      "Informe um custo válido com no máximo " +
+      "duas casas decimais."
+    );
   }
 
   const numericValue =
@@ -227,38 +205,11 @@ function validateEmail(email) {
   );
 }
 
-function getLatestOccurrenceDate(
-  occurrences,
-  ignoredOccurrenceId
-) {
-  return occurrences
-    .filter(
-      (item) =>
-        item.id !== ignoredOccurrenceId &&
-        Boolean(item.data)
-    )
-    .reduce(
-      (latestDate, item) => {
-        if (
-          !latestDate ||
-          item.data > latestDate
-        ) {
-          return item.data;
-        }
-
-        return latestDate;
-      },
-      ""
-    );
-}
-
 export default function OccurrenceModal({
   isOpen,
   initialMode = "view",
   occurrence,
-  occurrences = [],
   animalId,
-  animalCastrado = false,
   onClose,
   onSaved,
   onDeleted,
@@ -296,65 +247,6 @@ export default function OccurrenceModal({
 
   const isAdoption =
     draft.tipo === "ADOCAO";
-
-  const protectedOccurrence =
-    isProtectedOccurrence(
-      draft.tipo
-    );
-
-  const terminalOccurrence =
-    useMemo(
-      () =>
-        occurrences.find((item) =>
-          isTerminalOccurrence(item.tipo)
-        ) || null,
-      [occurrences]
-    );
-
-  const terminalOtherThanCurrent =
-    terminalOccurrence &&
-    terminalOccurrence.id !== draft.id
-      ? terminalOccurrence
-      : null;
-
-  const hasExistingCastration =
-    useMemo(
-      () =>
-        occurrences.some(
-          (item) =>
-            item.tipo === "CASTRACAO" &&
-            item.id !== draft.id
-        ),
-      [
-        occurrences,
-        draft.id,
-      ]
-    );
-
-  const latestOtherOccurrenceDate =
-    useMemo(
-      () =>
-        getLatestOccurrenceDate(
-          occurrences,
-          draft.id
-        ),
-      [
-        occurrences,
-        draft.id,
-      ]
-    );
-
-  const minimumDate =
-    isTerminalOccurrence(draft.tipo)
-      ? latestOtherOccurrenceDate ||
-        undefined
-      : undefined;
-
-  const maximumDate =
-    !isTerminalOccurrence(draft.tipo) &&
-    terminalOtherThanCurrent?.data
-      ? terminalOtherThanCurrent.data
-      : undefined;
 
   useEffect(() => {
     if (!isOpen) {
@@ -423,7 +315,10 @@ export default function OccurrenceModal({
     return null;
   }
 
-  function handleChange(field, value) {
+  function handleChange(
+    field,
+    value
+  ) {
     setDraft((currentDraft) => ({
       ...currentDraft,
       [field]: value,
@@ -435,6 +330,7 @@ export default function OccurrenceModal({
   function handleTypeChange(value) {
     setDraft((currentDraft) => ({
       ...currentDraft,
+
       tipo: value,
 
       adocao:
@@ -478,9 +374,13 @@ export default function OccurrenceModal({
       return;
     }
 
-    if (
-      file.type !== "application/pdf"
-    ) {
+    const isPdf =
+      file.type === "application/pdf" ||
+      file.name
+        .toLowerCase()
+        .endsWith(".pdf");
+
+    if (!isPdf) {
       setErrorMessage(
         "Os documentos da adoção devem estar no formato PDF."
       );
@@ -489,41 +389,23 @@ export default function OccurrenceModal({
       return;
     }
 
-    handleAdoptionChange(field, file);
-  }
-
-  function isTypeOptionDisabled(type) {
-    if (!isCreateMode) {
-      return false;
-    }
-
-    if (
-      isTerminalOccurrence(type) &&
-      terminalOccurrence
-    ) {
-      return true;
-    }
-
-    if (
-      type === "CASTRACAO" &&
-      (
-        animalCastrado ||
-        hasExistingCastration
-      )
-    ) {
-      return true;
-    }
-
-    return false;
+    handleAdoptionChange(
+      field,
+      file
+    );
   }
 
   function validateForm() {
     if (!draft.tipo) {
-      return "Selecione o tipo da ocorrência.";
+      return (
+        "Selecione o tipo da ocorrência."
+      );
     }
 
     if (!draft.data) {
-      return "Informe a data da ocorrência.";
+      return (
+        "Informe a data da ocorrência."
+      );
     }
 
     const costError =
@@ -533,78 +415,28 @@ export default function OccurrenceModal({
       return costError;
     }
 
-    if (
-      isTerminalOccurrence(draft.tipo) &&
-      terminalOtherThanCurrent
-    ) {
-      return (
-        `O animal já possui uma ocorrência de ` +
-        `${getOccurrenceTypeLabel(
-          terminalOtherThanCurrent.tipo
-        )} em ${formatDate(
-          terminalOtherThanCurrent.data
-        )}.`
-      );
-    }
-
-    if (
-      !isTerminalOccurrence(draft.tipo) &&
-      terminalOtherThanCurrent?.data &&
-      draft.data >
-        terminalOtherThanCurrent.data
-    ) {
-      return (
-        "A data da ocorrência deve ser igual ou anterior a " +
-        `${formatDate(
-          terminalOtherThanCurrent.data
-        )}, data da ocorrência de ` +
-        `${getOccurrenceTypeLabel(
-          terminalOtherThanCurrent.tipo
-        )}.`
-      );
-    }
-
-    if (
-      isTerminalOccurrence(draft.tipo) &&
-      latestOtherOccurrenceDate &&
-      draft.data <
-        latestOtherOccurrenceDate
-    ) {
-      return (
-        "A data deve ser igual ou posterior à ocorrência mais recente, " +
-        `registrada em ${formatDate(
-          latestOtherOccurrenceDate
-        )}.`
-      );
-    }
-
-    if (
-      isCreateMode &&
-      draft.tipo === "CASTRACAO" &&
-      (
-        animalCastrado ||
-        hasExistingCastration
-      )
-    ) {
-      return "O animal já possui castração registrada.";
-    }
-
     if (!isAdoption) {
       return "";
     }
 
     const adoption =
-      normalizeAdoption(draft.adocao);
+      normalizeAdoption(
+        draft.adocao
+      );
 
     if (!adoption.nome.trim()) {
-      return "Informe o nome do adotante.";
+      return (
+        "Informe o nome do adotante."
+      );
     }
 
     if (
       adoption.email &&
       !validateEmail(adoption.email)
     ) {
-      return "Informe um e-mail válido para o adotante.";
+      return (
+        "Informe um e-mail válido para o adotante."
+      );
     }
 
     const hasInterview =
@@ -618,11 +450,15 @@ export default function OccurrenceModal({
       Boolean(adoption.termoNome);
 
     if (!hasInterview) {
-      return "Anexe a entrevista de adoção em PDF.";
+      return (
+        "Anexe a entrevista de adoção em PDF."
+      );
     }
 
     if (!hasTerm) {
-      return "Anexe o termo de adoção em PDF.";
+      return (
+        "Anexe o termo de adoção em PDF."
+      );
     }
 
     return "";
@@ -633,7 +469,10 @@ export default function OccurrenceModal({
       validateForm();
 
     if (validationError) {
-      setErrorMessage(validationError);
+      setErrorMessage(
+        validationError
+      );
+
       return;
     }
 
@@ -670,26 +509,35 @@ export default function OccurrenceModal({
   }
 
   async function handleDelete() {
-    if (
-      !draft.id ||
-      protectedOccurrence
-    ) {
+    if (!draft.id) {
       return;
     }
 
-    const confirmationMessage =
-      draft.tipo === "ADOCAO"
-        ? (
-          "Deseja realmente excluir esta adoção? " +
-          "A ocorrência, os dados da adoção, a entrevista e o termo serão removidos. " +
-          "O animal voltará para o status Disponível para adoção."
-        )
-        : (
-          `Deseja realmente excluir a ocorrência ` +
-          `"${getOccurrenceTypeLabel(
-            draft.tipo
-          )}"?`
-        );
+    let confirmationMessage =
+      `Deseja realmente excluir a ocorrência ` +
+      `"${getOccurrenceTypeLabel(
+        draft.tipo
+      )}"?`;
+
+    if (draft.tipo === "ADOCAO") {
+      confirmationMessage =
+        "Deseja realmente excluir esta adoção? " +
+        "Os dados da adoção e seus documentos " +
+        "também serão removidos. " +
+        "O animal retornará ao status padrão.";
+    }
+
+    if (draft.tipo === "OBITO") {
+      confirmationMessage =
+        "Deseja realmente excluir esta ocorrência de óbito? " +
+        "O animal retornará ao status padrão.";
+    }
+
+    if (draft.tipo === "CASTRACAO") {
+      confirmationMessage =
+        "Deseja realmente excluir esta ocorrência de castração? " +
+        "O animal voltará a ser marcado como não castrado.";
+    }
 
     const confirmed =
       window.confirm(
@@ -704,7 +552,10 @@ export default function OccurrenceModal({
     setErrorMessage("");
 
     try {
-      await deleteOccurrence(draft.id);
+      await deleteOccurrence(
+        draft.id
+      );
+
       await onDeleted?.(draft);
     } catch (error) {
       setErrorMessage(
@@ -743,20 +594,24 @@ export default function OccurrenceModal({
     }
   }
 
-  const modalTitle = isCreateMode
-    ? "Nova ocorrência"
-    : isEditMode
-      ? "Editar ocorrência"
-      : "Detalhes da ocorrência";
+  const modalTitle =
+    isCreateMode
+      ? "Nova ocorrência"
+      : isEditMode
+        ? "Editar ocorrência"
+        : "Detalhes da ocorrência";
 
-  const modalSubtitle = isCreateMode
-    ? "Registre um acontecimento relacionado ao animal."
-    : isEditMode
-      ? "Atualize as informações da ocorrência."
-      : "Consulte as informações registradas.";
+  const modalSubtitle =
+    isCreateMode
+      ? "Registre um acontecimento relacionado ao animal."
+      : isEditMode
+        ? "Atualize as informações da ocorrência."
+        : "Consulte as informações registradas.";
 
   const adoption =
-    normalizeAdoption(draft.adocao);
+    normalizeAdoption(
+      draft.adocao
+    );
 
   return (
     <div
@@ -777,7 +632,9 @@ export default function OccurrenceModal({
         aria-modal="true"
         aria-labelledby="occurrence-modal-title"
       >
-        <div className={styles.header}>
+        <div
+          className={styles.header}
+        >
           <div
             className={
               styles.headerContent
@@ -788,19 +645,25 @@ export default function OccurrenceModal({
                 styles.headerIcon
               }
             >
-              <CalendarDays size={22} />
+              <CalendarDays
+                size={22}
+              />
             </div>
 
             <div>
               <h2
                 id="occurrence-modal-title"
-                className={styles.title}
+                className={
+                  styles.title
+                }
               >
                 {modalTitle}
               </h2>
 
               <p
-                className={styles.subtitle}
+                className={
+                  styles.subtitle
+                }
               >
                 {modalSubtitle}
               </p>
@@ -809,7 +672,9 @@ export default function OccurrenceModal({
 
           <button
             type="button"
-            className={styles.closeButton}
+            className={
+              styles.closeButton
+            }
             onClick={onClose}
             disabled={isSaving}
             aria-label="Fechar modal"
@@ -818,42 +683,31 @@ export default function OccurrenceModal({
           </button>
         </div>
 
-        <div className={styles.content}>
-          {terminalOtherThanCurrent && (
+        <div
+          className={styles.content}
+        >
+          <div
+            className={
+              styles.fieldsGrid
+            }
+          >
             <div
-              className={
-                styles.lockedNotice
-              }
+              className={styles.field}
             >
-              O animal possui uma ocorrência de{" "}
-              <strong>
-                {getOccurrenceTypeLabel(
-                  terminalOtherThanCurrent.tipo
-                )}
-              </strong>{" "}
-              em{" "}
-              <strong>
-                {formatDate(
-                  terminalOtherThanCurrent.data
-                )}
-              </strong>
-              . Novas ocorrências devem ter data
-              igual ou anterior.
-            </div>
-          )}
-
-          <div className={styles.fieldsGrid}>
-            <div className={styles.field}>
               <label
                 htmlFor="occurrence-type"
-                className={styles.label}
+                className={
+                  styles.label
+                }
               >
                 Tipo
               </label>
 
               <select
                 id="occurrence-type"
-                className={styles.input}
+                className={
+                  styles.input
+                }
                 value={draft.tipo}
                 onChange={(event) =>
                   handleTypeChange(
@@ -870,11 +724,12 @@ export default function OccurrenceModal({
                 {OCCURRENCE_TYPE_OPTIONS.map(
                   (option) => (
                     <option
-                      key={option.value}
-                      value={option.value}
-                      disabled={isTypeOptionDisabled(
+                      key={
                         option.value
-                      )}
+                      }
+                      value={
+                        option.value
+                      }
                     >
                       {option.label}
                     </option>
@@ -888,17 +743,22 @@ export default function OccurrenceModal({
                     styles.fieldHint
                   }
                 >
-                  O tipo não pode ser
-                  alterado depois que a
-                  ocorrência foi criada.
+                  O tipo não pode
+                  ser alterado depois
+                  que a ocorrência
+                  foi criada.
                 </span>
               )}
             </div>
 
-            <div className={styles.field}>
+            <div
+              className={styles.field}
+            >
               <label
                 htmlFor="occurrence-date"
-                className={styles.label}
+                className={
+                  styles.label
+                }
               >
                 Data
               </label>
@@ -906,10 +766,10 @@ export default function OccurrenceModal({
               <input
                 id="occurrence-date"
                 type="date"
-                className={styles.input}
+                className={
+                  styles.input
+                }
                 value={draft.data}
-                min={minimumDate}
-                max={maximumDate}
                 onChange={(event) =>
                   handleChange(
                     "data",
@@ -922,38 +782,16 @@ export default function OccurrenceModal({
                 }
                 required
               />
-
-              {minimumDate && (
-                <span
-                  className={
-                    styles.fieldHint
-                  }
-                >
-                  A data deve ser igual ou
-                  posterior a{" "}
-                  {formatDate(minimumDate)},
-                  pois já existem ocorrências
-                  anteriores cadastradas.
-                </span>
-              )}
-
-              {maximumDate && (
-                <span
-                  className={
-                    styles.fieldHint
-                  }
-                >
-                  A data deve ser igual ou
-                  anterior a{" "}
-                  {formatDate(maximumDate)}.
-                </span>
-              )}
             </div>
 
-            <div className={styles.field}>
+            <div
+              className={styles.field}
+            >
               <label
                 htmlFor="occurrence-cost"
-                className={styles.label}
+                className={
+                  styles.label
+                }
               >
                 Custo
               </label>
@@ -977,8 +815,13 @@ export default function OccurrenceModal({
                   min="0"
                   step="0.01"
                   inputMode="decimal"
-                  className={`${styles.input} ${styles.costInput}`}
-                  value={draft.custo}
+                  className={
+                    `${styles.input} ` +
+                    `${styles.costInput}`
+                  }
+                  value={
+                    draft.custo
+                  }
                   onChange={(event) =>
                     handleChange(
                       "custo",
@@ -1003,16 +846,25 @@ export default function OccurrenceModal({
             </div>
 
             {isViewMode && (
-              <div className={styles.field}>
+              <div
+                className={
+                  styles.field
+                }
+              >
                 <label
-                  className={styles.label}
+                  className={
+                    styles.label
+                  }
                 >
                   Criado por
                 </label>
 
                 <input
                   type="text"
-                  className={`${styles.input} ${styles.readOnlyInput}`}
+                  className={
+                    `${styles.input} ` +
+                    `${styles.readOnlyInput}`
+                  }
                   value={
                     draft.criadoPorNome ||
                     "Não informado"
@@ -1023,19 +875,28 @@ export default function OccurrenceModal({
             )}
 
             <div
-              className={`${styles.field} ${styles.fullWidth}`}
+              className={
+                `${styles.field} ` +
+                `${styles.fullWidth}`
+              }
             >
               <label
                 htmlFor="occurrence-description"
-                className={styles.label}
+                className={
+                  styles.label
+                }
               >
                 Descrição
               </label>
 
               <textarea
                 id="occurrence-description"
-                className={styles.textarea}
-                value={draft.descricao}
+                className={
+                  styles.textarea
+                }
+                value={
+                  draft.descricao
+                }
                 onChange={(event) =>
                   handleChange(
                     "descricao",
@@ -1085,8 +946,9 @@ export default function OccurrenceModal({
                     styles.sectionText
                   }
                 >
-                  Informe os dados do adotante
-                  e os documentos obrigatórios.
+                  Informe os dados
+                  do adotante e os
+                  documentos obrigatórios.
                 </p>
               </div>
 
@@ -1095,7 +957,11 @@ export default function OccurrenceModal({
                   styles.fieldsGrid
                 }
               >
-                <div className={styles.field}>
+                <div
+                  className={
+                    styles.field
+                  }
+                >
                   <label
                     className={
                       styles.label
@@ -1106,8 +972,12 @@ export default function OccurrenceModal({
 
                   <input
                     type="text"
-                    className={styles.input}
-                    value={adoption.nome}
+                    className={
+                      styles.input
+                    }
+                    value={
+                      adoption.nome
+                    }
                     onChange={(event) =>
                       handleAdoptionChange(
                         "nome",
@@ -1123,7 +993,11 @@ export default function OccurrenceModal({
                   />
                 </div>
 
-                <div className={styles.field}>
+                <div
+                  className={
+                    styles.field
+                  }
+                >
                   <label
                     className={
                       styles.label
@@ -1134,8 +1008,12 @@ export default function OccurrenceModal({
 
                   <input
                     type="text"
-                    className={styles.input}
-                    value={adoption.cpfRg}
+                    className={
+                      styles.input
+                    }
+                    value={
+                      adoption.cpfRg
+                    }
                     onChange={(event) =>
                       handleAdoptionChange(
                         "cpfRg",
@@ -1150,7 +1028,11 @@ export default function OccurrenceModal({
                   />
                 </div>
 
-                <div className={styles.field}>
+                <div
+                  className={
+                    styles.field
+                  }
+                >
                   <label
                     className={
                       styles.label
@@ -1161,8 +1043,12 @@ export default function OccurrenceModal({
 
                   <input
                     type="tel"
-                    className={styles.input}
-                    value={adoption.telefone}
+                    className={
+                      styles.input
+                    }
+                    value={
+                      adoption.telefone
+                    }
                     onChange={(event) =>
                       handleAdoptionChange(
                         "telefone",
@@ -1177,7 +1063,11 @@ export default function OccurrenceModal({
                   />
                 </div>
 
-                <div className={styles.field}>
+                <div
+                  className={
+                    styles.field
+                  }
+                >
                   <label
                     className={
                       styles.label
@@ -1188,8 +1078,12 @@ export default function OccurrenceModal({
 
                   <input
                     type="email"
-                    className={styles.input}
-                    value={adoption.email}
+                    className={
+                      styles.input
+                    }
+                    value={
+                      adoption.email
+                    }
                     onChange={(event) =>
                       handleAdoptionChange(
                         "email",
@@ -1205,7 +1099,10 @@ export default function OccurrenceModal({
                 </div>
 
                 <div
-                  className={`${styles.field} ${styles.fullWidth}`}
+                  className={
+                    `${styles.field} ` +
+                    `${styles.fullWidth}`
+                  }
                 >
                   <label
                     className={
@@ -1219,7 +1116,9 @@ export default function OccurrenceModal({
                     className={
                       styles.textarea
                     }
-                    value={adoption.endereco}
+                    value={
+                      adoption.endereco
+                    }
                     onChange={(event) =>
                       handleAdoptionChange(
                         "endereco",
@@ -1235,7 +1134,10 @@ export default function OccurrenceModal({
                 </div>
 
                 <div
-                  className={`${styles.field} ${styles.fullWidth}`}
+                  className={
+                    `${styles.field} ` +
+                    `${styles.fullWidth}`
+                  }
                 >
                   <label
                     className={
@@ -1290,18 +1192,23 @@ export default function OccurrenceModal({
                       styles.documentBox
                     }
                   >
-                    <FileText size={22} />
+                    <FileText
+                      size={22}
+                    />
 
                     <span
                       className={
                         styles.documentName
                       }
                     >
-                      {adoption
-                        .entrevistaArquivo
-                        ?.name ||
-                        adoption.entrevistaNome ||
-                        "Nenhum arquivo selecionado"}
+                      {
+                        adoption
+                          .entrevistaArquivo
+                          ?.name ||
+                        adoption
+                          .entrevistaNome ||
+                        "Nenhum arquivo selecionado"
+                      }
                     </span>
                   </div>
 
@@ -1316,32 +1223,42 @@ export default function OccurrenceModal({
                           styles.uploadButton
                         }
                       >
-                        <Upload size={17} />
+                        <Upload
+                          size={17}
+                        />
 
                         <span>
-                          {adoption.entrevistaNome
-                            ? "Substituir PDF"
-                            : "Selecionar PDF"}
+                          {
+                            adoption
+                              .entrevistaNome
+                              ? "Substituir PDF"
+                              : "Selecionar PDF"
+                          }
                         </span>
 
                         <input
                           type="file"
-                          accept="application/pdf"
+                          accept="application/pdf,.pdf"
                           className={
                             styles.hiddenInput
                           }
-                          onChange={(event) =>
+                          onChange={(
+                            event
+                          ) =>
                             handleAdoptionFileChange(
                               "entrevistaArquivo",
                               event
                             )
                           }
-                          disabled={isSaving}
+                          disabled={
+                            isSaving
+                          }
                         />
                       </label>
                     )}
 
-                    {adoption.entrevistaUrl && (
+                    {adoption
+                      .entrevistaUrl && (
                       <button
                         type="button"
                         className={
@@ -1349,14 +1266,23 @@ export default function OccurrenceModal({
                         }
                         onClick={() =>
                           handleDownload(
-                            adoption.entrevistaUrl,
-                            adoption.entrevistaNome
+                            adoption
+                              .entrevistaUrl,
+                            adoption
+                              .entrevistaNome
                           )
                         }
-                        disabled={isSaving}
+                        disabled={
+                          isSaving
+                        }
                       >
-                        <Download size={17} />
-                        <span>Baixar</span>
+                        <Download
+                          size={17}
+                        />
+
+                        <span>
+                          Baixar
+                        </span>
                       </button>
                     )}
                   </div>
@@ -1380,17 +1306,23 @@ export default function OccurrenceModal({
                       styles.documentBox
                     }
                   >
-                    <FileText size={22} />
+                    <FileText
+                      size={22}
+                    />
 
                     <span
                       className={
                         styles.documentName
                       }
                     >
-                      {adoption.termoArquivo
-                        ?.name ||
-                        adoption.termoNome ||
-                        "Nenhum arquivo selecionado"}
+                      {
+                        adoption
+                          .termoArquivo
+                          ?.name ||
+                        adoption
+                          .termoNome ||
+                        "Nenhum arquivo selecionado"
+                      }
                     </span>
                   </div>
 
@@ -1405,32 +1337,42 @@ export default function OccurrenceModal({
                           styles.uploadButton
                         }
                       >
-                        <Upload size={17} />
+                        <Upload
+                          size={17}
+                        />
 
                         <span>
-                          {adoption.termoNome
-                            ? "Substituir PDF"
-                            : "Selecionar PDF"}
+                          {
+                            adoption
+                              .termoNome
+                              ? "Substituir PDF"
+                              : "Selecionar PDF"
+                          }
                         </span>
 
                         <input
                           type="file"
-                          accept="application/pdf"
+                          accept="application/pdf,.pdf"
                           className={
                             styles.hiddenInput
                           }
-                          onChange={(event) =>
+                          onChange={(
+                            event
+                          ) =>
                             handleAdoptionFileChange(
                               "termoArquivo",
                               event
                             )
                           }
-                          disabled={isSaving}
+                          disabled={
+                            isSaving
+                          }
                         />
                       </label>
                     )}
 
-                    {adoption.termoUrl && (
+                    {adoption
+                      .termoUrl && (
                       <button
                         type="button"
                         className={
@@ -1438,14 +1380,23 @@ export default function OccurrenceModal({
                         }
                         onClick={() =>
                           handleDownload(
-                            adoption.termoUrl,
-                            adoption.termoNome
+                            adoption
+                              .termoUrl,
+                            adoption
+                              .termoNome
                           )
                         }
-                        disabled={isSaving}
+                        disabled={
+                          isSaving
+                        }
                       >
-                        <Download size={17} />
-                        <span>Baixar</span>
+                        <Download
+                          size={17}
+                        />
+
+                        <span>
+                          Baixar
+                        </span>
                       </button>
                     )}
                   </div>
@@ -1502,46 +1453,54 @@ export default function OccurrenceModal({
                     styles.auditValue
                   }
                 >
-                  {draft.dataModificacao
-                    ? `${formatDateTime(
-                        draft.dataModificacao
-                      )}${
-                        draft.modificadoPorNome
-                          ? ` por ${draft.modificadoPorNome}`
-                          : ""
-                      }`
-                    : "Ainda não modificada"}
+                  {
+                    draft.dataModificacao
+                      ? `${formatDateTime(
+                          draft.dataModificacao
+                        )}${
+                          draft.modificadoPorNome
+                            ? ` por ${draft.modificadoPorNome}`
+                            : ""
+                        }`
+                      : "Ainda não modificada"
+                  }
                 </strong>
               </div>
             </div>
           )}
 
-          {protectedOccurrence &&
-            isViewMode && (
+          {isViewMode &&
+            (
+              draft.tipo === "ADOCAO" ||
+              draft.tipo === "OBITO" ||
+              draft.tipo === "CASTRACAO"
+            ) && (
               <div
                 className={
                   styles.lockedNotice
                 }
               >
-                Esta ocorrência altera
-                informações permanentes do
-                animal e não pode ser excluída
-                diretamente.
-              </div>
-            )}
+                {draft.tipo ===
+                  "ADOCAO" &&
+                  (
+                    "Ao excluir esta adoção, os dados e documentos " +
+                    "também serão removidos e o animal retornará " +
+                    "ao status padrão."
+                  )}
 
-          {draft.tipo === "ADOCAO" &&
-            isViewMode && (
-              <div
-                className={
-                  styles.lockedNotice
-                }
-              >
-                Ao excluir esta ocorrência, os
-                dados da adoção, a entrevista e
-                o termo também serão removidos.
-                O animal voltará para o status
-                Disponível para adoção.
+                {draft.tipo ===
+                  "OBITO" &&
+                  (
+                    "Ao excluir esta ocorrência de óbito, " +
+                    "o animal retornará ao status padrão."
+                  )}
+
+                {draft.tipo ===
+                  "CASTRACAO" &&
+                  (
+                    "Ao excluir esta ocorrência de castração, " +
+                    "o animal voltará a ser marcado como não castrado."
+                  )}
               </div>
             )}
 
@@ -1557,22 +1516,30 @@ export default function OccurrenceModal({
           )}
         </div>
 
-        <div className={styles.footer}>
+        <div
+          className={styles.footer}
+        >
           {isViewMode && (
             <>
-              {!protectedOccurrence && (
-                <button
-                  type="button"
-                  className={
-                    styles.deleteButton
-                  }
-                  onClick={handleDelete}
-                  disabled={isSaving}
-                >
-                  <Trash2 size={18} />
-                  <span>Excluir</span>
-                </button>
-              )}
+              <button
+                type="button"
+                className={
+                  styles.deleteButton
+                }
+                onClick={
+                  handleDelete
+                }
+                disabled={
+                  isSaving
+                }
+              >
+                <Trash2
+                  size={18}
+                />
+                <span>
+                  Excluir
+                </span>
+              </button>
 
               <div
                 className={
@@ -1584,11 +1551,20 @@ export default function OccurrenceModal({
                   className={
                     styles.cancelButton
                   }
-                  onClick={onClose}
-                  disabled={isSaving}
+                  onClick={
+                    onClose
+                  }
+                  disabled={
+                    isSaving
+                  }
                 >
-                  <CircleX size={18} />
-                  <span>Fechar</span>
+                  <CircleX
+                    size={18}
+                  />
+
+                  <span>
+                    Fechar
+                  </span>
                 </button>
 
                 <button
@@ -1599,10 +1575,17 @@ export default function OccurrenceModal({
                   onClick={() =>
                     setMode("edit")
                   }
-                  disabled={isSaving}
+                  disabled={
+                    isSaving
+                  }
                 >
-                  <Pencil size={18} />
-                  <span>Editar</span>
+                  <Pencil
+                    size={18}
+                  />
+
+                  <span>
+                    Editar
+                  </span>
                 </button>
               </div>
             </>
@@ -1622,10 +1605,17 @@ export default function OccurrenceModal({
                 onClick={
                   handleCancelEdit
                 }
-                disabled={isSaving}
+                disabled={
+                  isSaving
+                }
               >
-                <CircleX size={18} />
-                <span>Cancelar</span>
+                <CircleX
+                  size={18}
+                />
+
+                <span>
+                  Cancelar
+                </span>
               </button>
 
               <button
@@ -1633,15 +1623,23 @@ export default function OccurrenceModal({
                 className={
                   styles.saveButton
                 }
-                onClick={handleSave}
-                disabled={isSaving}
+                onClick={
+                  handleSave
+                }
+                disabled={
+                  isSaving
+                }
               >
-                <Save size={18} />
+                <Save
+                  size={18}
+                />
 
                 <span>
-                  {isSaving
-                    ? "Salvando..."
-                    : "Salvar alterações"}
+                  {
+                    isSaving
+                      ? "Salvando..."
+                      : "Salvar alterações"
+                  }
                 </span>
               </button>
             </div>
@@ -1658,11 +1656,20 @@ export default function OccurrenceModal({
                 className={
                   styles.cancelButton
                 }
-                onClick={onClose}
-                disabled={isSaving}
+                onClick={
+                  onClose
+                }
+                disabled={
+                  isSaving
+                }
               >
-                <CircleX size={18} />
-                <span>Cancelar</span>
+                <CircleX
+                  size={18}
+                />
+
+                <span>
+                  Cancelar
+                </span>
               </button>
 
               <button
@@ -1670,15 +1677,23 @@ export default function OccurrenceModal({
                 className={
                   styles.saveButton
                 }
-                onClick={handleSave}
-                disabled={isSaving}
+                onClick={
+                  handleSave
+                }
+                disabled={
+                  isSaving
+                }
               >
-                <Save size={18} />
+                <Save
+                  size={18}
+                />
 
                 <span>
-                  {isSaving
-                    ? "Salvando..."
-                    : "Salvar ocorrência"}
+                  {
+                    isSaving
+                      ? "Salvando..."
+                      : "Salvar ocorrência"
+                  }
                 </span>
               </button>
             </div>

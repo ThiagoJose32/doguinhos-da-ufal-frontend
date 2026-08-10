@@ -30,8 +30,16 @@ function clearStoredAuth() {
   sessionStorage.removeItem(USER_KEY);
 }
 
+const API_BASE_URL = import.meta.env.PROD
+  ? ""
+  : (
+      import.meta.env.VITE_API_URL?.trim() ||
+      "http://localhost:8080"
+    );
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "https://doguinhosdaufal.com.br",
+  baseURL: API_BASE_URL,
+  timeout: 15000,
 });
 
 api.interceptors.request.use(

@@ -24,7 +24,6 @@ import OccurrenceModal from "../OccurrenceModal/OccurrenceModal";
 import {
   getOccurrenceById,
   getOccurrenceTypeLabel,
-  isTerminalOccurrence,
   listOccurrencesByAnimal,
 } from "../../services/occurrenceService";
 
@@ -314,15 +313,6 @@ export default function AnimalModal({
   const showTabs =
     !isCreateMode &&
     isViewMode;
-
-  const terminalOccurrence =
-    useMemo(
-      () =>
-        occurrences.find((item) =>
-          isTerminalOccurrence(item.tipo)
-        ) || null,
-      [occurrences]
-    );
 
   const modalTitle = useMemo(() => {
     if (isCreateMode) {
@@ -1280,31 +1270,6 @@ export default function AnimalModal({
               cuidados e procedimentos
               relacionados ao animal.
             </p>
-
-            {terminalOccurrence && (
-              <p
-                className={
-                  styles.occurrencesSubtitle
-                }
-              >
-                O histórico está encerrado por
-                uma ocorrência de{" "}
-                <strong>
-                  {getOccurrenceTypeLabel(
-                    terminalOccurrence.tipo
-                  )}
-                </strong>{" "}
-                em{" "}
-                <strong>
-                  {formatOccurrenceDate(
-                    terminalOccurrence.data
-                  )}
-                </strong>
-                . Ainda é possível cadastrar
-                ocorrências com data igual ou
-                anterior.
-              </p>
-            )}
           </div>
 
           <button
@@ -1578,14 +1543,6 @@ export default function AnimalModal({
                 }
               >
                 Ocorrências
-
-                <span
-                  className={
-                    styles.tabCount
-                  }
-                >
-                  {occurrences.length}
-                </span>
               </button>
             </div>
           )}

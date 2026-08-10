@@ -34,29 +34,29 @@ import heroDog1 from "../../assets/figma/dog1.jpg";
 import heroDog2 from "../../assets/figma/dog2.jpeg";
 import heroDog3 from "../../assets/figma/dog3.jpg";
 
-import partnersLogo from "../../assets/figma/image 5.png";
+import ifalLogo from "../../assets/ifalLogo.png";
+import ufalLogo from "../../assets/ufalLogo.png";
+
 import visionDog from "../../assets/animals/dog-mel.png";
 
 import serviceBanho from "../../assets/figma/banho.png";
-import serviceTosa from "../../assets/figma/saude.png";
+import serviceSaude from "../../assets/figma/saude.png";
 import serviceAlimentacao from "../../assets/figma/alimentacao.png";
-import serviceCastracao from "../../assets/figma/adocao.png";
+import serviceAdocao from "../../assets/figma/adocao.png";
 
-import volDefault from "../../assets/volunteers/vol-default.png";
-import volThiago from "../../assets/volunteers/vol-thiago.jpg";
-import volDiana from "../../assets/volunteers/vol-diana.jpg";
-import volErika from "../../assets/volunteers/vol-erika.jpg";
-import volKarlla from "../../assets/volunteers/vol-karlla.jpg";
-import volJoandeson from "../../assets/volunteers/vol-joandeson.jpg";
-import volVanessa from "../../assets/volunteers/vol-vanessa.jpg";
+import volDefault from "../../assets/volunteers/volDefault.png";
+import volDiana from "../../assets/volunteers/volDiana.jpg";
+import volErick from "../../assets/volunteers/volDefault.png";
+import volErika from "../../assets/volunteers/volErika.jpg";
+import volJoandeson from "../../assets/volunteers/volJoandeson.jpg";
+import volKarlla from "../../assets/volunteers/volKarlla.jpg";
+import volMariana from "../../assets/volunteers/volDefault.png";
+import volThiago from "../../assets/volunteers/volThiago.jpg";
 
-import catAmarelinho from "../../assets/animals/cat-amarelinho.jpg";
-import catBatman from "../../assets/animals/cat-batman.jpg";
-import catCabecao from "../../assets/animals/cat-cabecao.jpg";
-import catChico from "../../assets/animals/cat-chico.jpg";
-import catCida from "../../assets/animals/cat-cida.jpg";
-import dogCacau from "../../assets/animals/dog-cacau.jpg";
-import dogAlfonso from "../../assets/animals/dog-alfonso.jpg";
+import dogDama from "../../assets/animals/dogDama.jpg";
+import dogPretinha from "../../assets/animals/dogPretinha.jpg";
+import dogPitoco from "../../assets/animals/dogPitoco.jpg";
+import catMilio from "../../assets/animals/catMilio.jpg";
 
 const VOLUNTEER_FORM_URL =
   "https://forms.gle/a4c4W8iu3e7hzq4XA";
@@ -109,14 +109,14 @@ const projectActions = [
   {
     id: "saude",
     title: "Acompanhamento de saúde",
-    image: serviceTosa,
+    image: serviceSaude,
     description:
       "Apoio em consultas, exames, tratamentos, vacinação e demais cuidados veterinários necessários.",
   },
   {
     id: "adocao",
     title: "Adoção responsável",
-    image: serviceCastracao,
+    image: serviceAdocao,
     description:
       "Divulgação e acompanhamento dos animais preparados para encontrar uma família responsável.",
   },
@@ -156,59 +156,35 @@ const helpOptions = [
 const animals = [
   {
     id: 1,
-    name: "Ralf",
-    photo: catAmarelinho,
-    species: "Gato",
+    name: "Dama",
+    photo: dogDama,
+    details: "Fêmea, 4 anos, porte médio",
     description:
       "Aguarda uma família responsável, preparada para oferecer proteção, cuidado e carinho.",
   },
   {
     id: 2,
-    name: "Belinha",
-    photo: catBatman,
-    species: "Gato",
+    name: "Pretinha",
+    photo: dogPretinha,
+    details: "Fêmea, 4 anos, porte médio",
     description:
       "Procura um novo lar onde possa receber atenção, segurança e acompanhamento responsável.",
   },
   {
     id: 3,
-    name: "Samanta",
-    photo: catCabecao,
-    species: "Gato",
+    name: "Pitoco",
+    photo: dogPitoco,
+    details: "Macho, 4 meses, porte médio",
     description:
       "Está disponível para adoção responsável e pode se tornar uma nova companheira para sua família.",
   },
   {
     id: 4,
-    name: "Theodoro",
-    photo: catChico,
-    species: "Gato",
+    name: "Milio",
+    photo: catMilio,
+    details: "Macho, 2 anos, porte médio",
     description:
       "Aguarda uma oportunidade de viver em um ambiente protegido, acolhedor e cheio de cuidado.",
-  },
-  {
-    id: 5,
-    name: "Cidinha",
-    photo: catCida,
-    species: "Gato",
-    description:
-      "Está à procura de uma família comprometida com uma adoção consciente e responsável.",
-  },
-  {
-    id: 6,
-    name: "Cacau",
-    photo: dogCacau,
-    species: "Cachorro",
-    description:
-      "Aguarda uma nova família que possa oferecer carinho, segurança e os cuidados necessários.",
-  },
-  {
-    id: 7,
-    name: "Alfonso",
-    photo: dogAlfonso,
-    species: "Cachorro",
-    description:
-      "Está disponível para adoção responsável e pronto para receber uma nova oportunidade.",
   },
 ];
 
@@ -873,10 +849,10 @@ export default function HomePage() {
 
                   <span
                     className={
-                      styles.animalSpecies
+                      styles.animalDetails
                     }
                   >
-                    {animal.species}
+                    {animal.details}
                   </span>
 
                   <p
@@ -1055,9 +1031,10 @@ export default function HomePage() {
               }
             >
               <img
-                src={partnersLogo}
+                src={ifalLogo}
                 alt="Instituições parceiras"
               />
+              
             </div>
           </div>
         </div>
@@ -1068,13 +1045,11 @@ export default function HomePage() {
           }
         >
           <span>
-            © {new Date().getFullYear()} ARA
-            Campus Pets
+            © {new Date().getFullYear()} ARA Campus Pets
           </span>
 
           <span>
-            Plataforma desenvolvida como
-            projeto de extensão.
+            Plataforma desenvolvida como projeto de extensão.
           </span>
         </div>
       </footer>

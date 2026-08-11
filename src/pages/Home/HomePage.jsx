@@ -26,23 +26,23 @@ import {
 
 import styles from "./HomePage.module.css";
 
-import petLogo from "../../assets/figma/Subtract.png";
+import doguinhosLogo from "../../assets/doguinhosLogo.png";
 import pawIcon from "../../assets/figma/Pets Streamline Outlined-Material-Symbols.png";
 
-import heroImage from "../../assets/figma/image 1.png";
+import heroImage from "../../assets/maePacoca.jpg";
 import heroDog1 from "../../assets/figma/dog1.jpg";
-import heroDog2 from "../../assets/figma/dog2.jpeg";
-import heroDog3 from "../../assets/figma/dog3.jpg";
+import heroDog2 from "../../assets/animals/coragem2.jpg";
+import heroDog3 from "../../assets/mada.jpeg";
 
 import ifalLogo from "../../assets/ifalLogo.png";
 import ufalLogo from "../../assets/ufalLogo.png";
 
-import visionDog from "../../assets/animals/dog-mel.png";
+import visionDog from "../../assets/animals/dogMel.png";
 
-import serviceBanho from "../../assets/figma/banho.png";
-import serviceSaude from "../../assets/figma/saude.png";
-import serviceAlimentacao from "../../assets/figma/alimentacao.png";
-import serviceAdocao from "../../assets/figma/adocao.png";
+import serviceBanho from "../../assets/banho.png";
+import serviceSaude from "../../assets/saude.jpg";
+import serviceAlimentacao from "../../assets/alimentacao.png";
+import serviceAdocao from "../../assets/adocao.png";
 
 import volDefault from "../../assets/volunteers/volDefault.png";
 import volDiana from "../../assets/volunteers/volDiana.jpg";
@@ -54,9 +54,14 @@ import volMariana from "../../assets/volunteers/volDefault.png";
 import volThiago from "../../assets/volunteers/volThiago.jpg";
 
 import dogDama from "../../assets/animals/dogDama.jpg";
-import dogPretinha from "../../assets/animals/dogPretinha.jpg";
+import dogPretinha from "../../assets/animals/dogPretinha.png";
 import dogPitoco from "../../assets/animals/dogPitoco.jpg";
+import dogBranca from "../../assets/animals/dogBranca.jpeg";
+import dogCacau from "../../assets/animals/dogCacau.jpeg";
 import catMilio from "../../assets/animals/catMilio.jpg";
+import catBartolomeu from "../../assets/animals/catBartolomeu.jpeg";
+import catAmora from "../../assets/animals/catAmora.jpeg";
+import catPacoca from "../../assets/animals/catPacoca.jpg";
 
 const VOLUNTEER_FORM_URL =
   "https://forms.gle/a4c4W8iu3e7hzq4XA";
@@ -158,31 +163,71 @@ const animals = [
     id: 1,
     name: "Dama",
     photo: dogDama,
-    details: "Fêmea, 4 anos, porte médio",
+    details: "Fêmea, 4 anos, porte médio, castrada e vacinada",
     description:
       "Aguarda uma família responsável, preparada para oferecer proteção, cuidado e carinho.",
   },
   {
     id: 2,
+    name: "Milio",
+    photo: catMilio,
+    details: "Macho, 2 anos, porte médio",
+    description:
+      "Aguarda uma oportunidade de viver em um ambiente protegido, acolhedor e cheio de cuidado.",
+  },
+  {
+    id: 3,
     name: "Pretinha",
     photo: dogPretinha,
-    details: "Fêmea, 4 anos, porte médio",
+    details: "Fêmea, 4 anos, porte médio, castrada e vacinada",
     description:
       "Procura um novo lar onde possa receber atenção, segurança e acompanhamento responsável.",
   },
   {
-    id: 3,
+    id: 4,
+    name: "Amora",
+    photo: catAmora,
+    details: "Fêmea, 2 anos, porte médio",
+    description:
+      "Aguarda uma oportunidade de viver em um ambiente protegido, acolhedor e cheio de cuidado.",
+  },
+  {
+    id: 5,
     name: "Pitoco",
     photo: dogPitoco,
     details: "Macho, 4 meses, porte médio",
     description:
-      "Está disponível para adoção responsável e pode se tornar uma nova companheira para sua família.",
+      "Está disponível para adoção responsável e pode se tornar um novo companheiro para sua família.",
   },
   {
-    id: 4,
-    name: "Milio",
-    photo: catMilio,
-    details: "Macho, 2 anos, porte médio",
+    id: 6,
+    name: "Paçoca",
+    photo: catPacoca,
+    details: "Macho, 1 ano, porte médio",
+    description:
+      "Aguarda uma oportunidade de viver em um ambiente protegido, acolhedor e cheio de cuidado.",
+  },
+  {
+    id: 7,
+    name: "Branca",
+    photo: dogBranca,
+    details: "Fêmea, 2 anos, porte médio",
+    description:
+      "Aguarda uma oportunidade de viver em um ambiente protegido, acolhedor e cheio de cuidado.",
+  },
+  {
+    id: 8,
+    name: "Bartolomeu",
+    photo: catBartolomeu,
+    details: "Macho, 4 anos, porte médio",
+    description:
+      "Aguarda uma oportunidade de viver em um ambiente protegido, acolhedor e cheio de cuidado.",
+  },
+  {
+    id: 9,
+    name: "Cacau",
+    photo: dogCacau,
+    details: "Fêmea, 4 mêses, porte médio",
     description:
       "Aguarda uma oportunidade de viver em um ambiente protegido, acolhedor e cheio de cuidado.",
   },
@@ -474,7 +519,7 @@ export default function HomePage() {
             aria-label="Ir para o início"
           >
             <img
-              src={petLogo}
+              src={doguinhosLogo}
               alt="ARA Campus Pets"
             />
 
@@ -959,7 +1004,7 @@ export default function HomePage() {
           <div className={styles.footerBrand}>
             <div className={styles.footerLogo}>
               <img
-                src={petLogo}
+                src={doguinhosLogo}
                 alt="ARA Campus Pets"
               />
             </div>

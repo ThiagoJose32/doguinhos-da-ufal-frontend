@@ -374,11 +374,14 @@ export default function VolunteersPage() {
               status
             );
 
-          const isVolunteer =
-            !isAdministrator(user);
+          const isInitializationAdmin =
+            String(user?.email || "")
+              .trim()
+              .toLowerCase() ===
+            "admin@teste.com";
 
           return (
-            isVolunteer &&
+            !isInitializationAdmin &&
             matchesTab &&
             matchesStatus
           );

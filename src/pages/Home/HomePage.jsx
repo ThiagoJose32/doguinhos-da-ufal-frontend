@@ -942,17 +942,6 @@ export default function HomePage() {
                 )
               )}
             </div>
-
-            <p
-              className={
-                styles.statsNote
-              }
-            >
-              Dados históricos divulgados
-              pelo projeto. As informações
-              serão atualizadas futuramente
-              na nova plataforma.
-            </p>
           </div>
         </section>
 

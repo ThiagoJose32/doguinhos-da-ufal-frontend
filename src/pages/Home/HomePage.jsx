@@ -8,11 +8,14 @@ import { Link } from "react-router-dom";
 import {
   ArrowRight,
   Car,
+  Check,
   ChevronLeft,
   ChevronRight,
+  Copy,
   HeartHandshake,
   Home,
   LogIn,
+  Mail,
   MapPin,
   Package,
   PawPrint,
@@ -26,31 +29,33 @@ import {
 
 import styles from "./HomePage.module.css";
 
-import doguinhosLogo from "../../assets/doguinhosLogo.png";
-import pawIcon from "../../assets/figma/Pets Streamline Outlined-Material-Symbols.png";
+import logoDoguinhos from "../../assets/logoDoguinhos.png";
+import pawIcon from "../../assets/icons/paw.png";
+import instagramIcon from "../../assets/icons/instagram.svg";
+import tiktokIcon from "../../assets/icons/tiktok.svg";
 
-import heroImage from "../../assets/maePacoca.jpg";
-import heroDog1 from "../../assets/figma/dog1.jpg";
-import heroDog2 from "../../assets/animals/coragem2.jpg";
-import heroDog3 from "../../assets/mada.jpeg";
+import heroImage1 from "../../assets/heroSlideMaePacoca.jpg";
+import heroImage2 from "../../assets/heroSlideMarrom.jpg";
+import heroImage3 from "../../assets/heroSlideCoragem.jpg";
+import heroImage4 from "../../assets/heroSlideMada.jpeg";
 
-import ifalLogo from "../../assets/ifalLogo.png";
-import ufalLogo from "../../assets/ufalLogo.png";
+import logoIfal from "../../assets/logoIfal.png";
+import logoUfal from "../../assets/logoUfal.png";
+
+import pixQrCode from "../../assets/pixQrCode.png";
 
 import visionDog from "../../assets/animals/dogMel.png";
 
-import serviceBanho from "../../assets/banho.png";
-import serviceSaude from "../../assets/saude.jpg";
-import serviceAlimentacao from "../../assets/alimentacao.png";
-import serviceAdocao from "../../assets/adocao.png";
+import servicoBanho from "../../assets/servicoBanho.png";
+import servicoSaude from "../../assets/servicoSaude.jpg";
+import servicoAlimentacao from "../../assets/servicoAlimentacao.png";
+import servicoAdocao from "../../assets/servicoAdocao.png";
 
 import volDefault from "../../assets/volunteers/volDefault.png";
 import volDiana from "../../assets/volunteers/volDiana.jpg";
-import volErick from "../../assets/volunteers/volDefault.png";
 import volErika from "../../assets/volunteers/volErika.jpg";
 import volJoandeson from "../../assets/volunteers/volJoandeson.jpg";
 import volKarlla from "../../assets/volunteers/volKarlla.jpg";
-import volMariana from "../../assets/volunteers/volDefault.png";
 import volThiago from "../../assets/volunteers/volThiago.jpg";
 
 import dogDama from "../../assets/animals/dogDama.jpg";
@@ -66,11 +71,26 @@ import catPacoca from "../../assets/animals/catPacoca.jpg";
 const VOLUNTEER_FORM_URL =
   "https://forms.gle/a4c4W8iu3e7hzq4XA";
 
+const ADOPTION_FORM_URL =
+  "https://docs.google.com/forms/d/e/1FAIpQLScN8KZdM5UGeZRw8UO6Jr1zy_v0DrrRdye1TUxtB1YVjBbMbw/viewform";
+
+const INSTAGRAM_URL =
+  "https://www.instagram.com/doguinhosdaufal/";
+
+const TIKTOK_URL =
+  "https://www.tiktok.com/@doguinhosdaufal";
+
+const CONTACT_EMAIL =
+  "doguinhosdaufal@gmail.com";
+
+const PIX_COPIA_E_COLA =
+  "Código copia e cola do PIX do Joandeson";
+
 const heroSlides = [
-  heroImage,
-  heroDog1,
-  heroDog2,
-  heroDog3,
+  heroImage1,
+  heroImage2,
+  heroImage3,
+  heroImage4,
 ];
 
 const projectStats = [
@@ -100,28 +120,28 @@ const projectActions = [
   {
     id: "alimentacao",
     title: "Alimentação",
-    image: serviceAlimentacao,
+    image: servicoAlimentacao,
     description:
       "Organização do fornecimento de ração e mobilização da comunidade para atender às necessidades dos animais.",
   },
   {
     id: "banho",
     title: "Higiene e bem-estar",
-    image: serviceBanho,
+    image: servicoBanho,
     description:
       "Cuidados de higiene que contribuem para o conforto, a saúde e a qualidade de vida dos animais.",
   },
   {
     id: "saude",
     title: "Acompanhamento de saúde",
-    image: serviceSaude,
+    image: servicoSaude,
     description:
       "Apoio em consultas, exames, tratamentos, vacinação e demais cuidados veterinários necessários.",
   },
   {
     id: "adocao",
     title: "Adoção responsável",
-    image: serviceAdocao,
+    image: servicoAdocao,
     description:
       "Divulgação e acompanhamento dos animais preparados para encontrar uma família responsável.",
   },
@@ -163,7 +183,8 @@ const animals = [
     id: 1,
     name: "Dama",
     photo: dogDama,
-    details: "Fêmea, 4 anos, porte médio, castrada e vacinada",
+    details:
+      "Fêmea, 4 anos, porte médio, castrada e vacinada",
     description:
       "Aguarda uma família responsável, preparada para oferecer proteção, cuidado e carinho.",
   },
@@ -171,7 +192,8 @@ const animals = [
     id: 2,
     name: "Milio",
     photo: catMilio,
-    details: "Macho, 2 anos, porte médio",
+    details:
+      "Macho, 2 anos, porte médio",
     description:
       "Aguarda uma oportunidade de viver em um ambiente protegido, acolhedor e cheio de cuidado.",
   },
@@ -179,7 +201,8 @@ const animals = [
     id: 3,
     name: "Pretinha",
     photo: dogPretinha,
-    details: "Fêmea, 4 anos, porte médio, castrada e vacinada",
+    details:
+      "Fêmea, 4 anos, porte médio, castrada e vacinada",
     description:
       "Procura um novo lar onde possa receber atenção, segurança e acompanhamento responsável.",
   },
@@ -187,7 +210,8 @@ const animals = [
     id: 4,
     name: "Amora",
     photo: catAmora,
-    details: "Fêmea, 2 anos, porte médio",
+    details:
+      "Fêmea, 2 anos, porte médio",
     description:
       "Aguarda uma oportunidade de viver em um ambiente protegido, acolhedor e cheio de cuidado.",
   },
@@ -195,7 +219,8 @@ const animals = [
     id: 5,
     name: "Pitoco",
     photo: dogPitoco,
-    details: "Macho, 4 meses, porte médio",
+    details:
+      "Macho, 4 meses, porte médio",
     description:
       "Está disponível para adoção responsável e pode se tornar um novo companheiro para sua família.",
   },
@@ -203,7 +228,8 @@ const animals = [
     id: 6,
     name: "Paçoca",
     photo: catPacoca,
-    details: "Macho, 1 ano, porte médio",
+    details:
+      "Macho, 1 ano, porte médio",
     description:
       "Aguarda uma oportunidade de viver em um ambiente protegido, acolhedor e cheio de cuidado.",
   },
@@ -211,7 +237,8 @@ const animals = [
     id: 7,
     name: "Branca",
     photo: dogBranca,
-    details: "Fêmea, 2 anos, porte médio",
+    details:
+      "Fêmea, 2 anos, porte médio",
     description:
       "Aguarda uma oportunidade de viver em um ambiente protegido, acolhedor e cheio de cuidado.",
   },
@@ -219,7 +246,8 @@ const animals = [
     id: 8,
     name: "Bartolomeu",
     photo: catBartolomeu,
-    details: "Macho, 4 anos, porte médio",
+    details:
+      "Macho, 4 anos, porte médio",
     description:
       "Aguarda uma oportunidade de viver em um ambiente protegido, acolhedor e cheio de cuidado.",
   },
@@ -227,7 +255,8 @@ const animals = [
     id: 9,
     name: "Cacau",
     photo: dogCacau,
-    details: "Fêmea, 4 mêses, porte médio",
+    details:
+      "Fêmea, 4 meses, porte médio",
     description:
       "Aguarda uma oportunidade de viver em um ambiente protegido, acolhedor e cheio de cuidado.",
   },
@@ -362,7 +391,9 @@ function HeroSlider() {
   }
 
   return (
-    <div className={styles.heroSlider}>
+    <div
+      className={styles.heroSlider}
+    >
       {heroSlides.map(
         (source, slideIndex) => (
           <img
@@ -381,26 +412,38 @@ function HeroSlider() {
         )
       )}
 
-      <div className={styles.heroOverlay} />
+      <div
+        className={styles.heroOverlay}
+      />
 
-      <div className={styles.heroContent}>
-        <span className={styles.heroTag}>
+      <div
+        className={styles.heroContent}
+      >
+        <span
+          className={styles.heroTag}
+        >
           ARA Campus Pets
         </span>
 
-        <h1 className={styles.heroTitle}>
+        <h1
+          className={styles.heroTitle}
+        >
           Transformando vidas, uma pata
           de cada vez
         </h1>
 
-        <p className={styles.heroText}>
+        <p
+          className={styles.heroText}
+        >
           Cuidado, acompanhamento e novas
           oportunidades para os animais
           do Campus Arapiraca e de seu
           entorno.
         </p>
 
-        <div className={styles.heroActions}>
+        <div
+          className={styles.heroActions}
+        >
           <a
             href="#adocao"
             className={
@@ -441,7 +484,9 @@ function HeroSlider() {
         <ChevronRight size={24} />
       </button>
 
-      <div className={styles.heroDots}>
+      <div
+        className={styles.heroDots}
+      >
         {heroSlides.map(
           (_, slideIndex) => (
             <button
@@ -472,7 +517,11 @@ function SectionTitle({
   description,
 }) {
   return (
-    <div className={styles.sectionHeading}>
+    <div
+      className={
+        styles.sectionHeading
+      }
+    >
       {eyebrow && (
         <span
           className={
@@ -483,7 +532,9 @@ function SectionTitle({
         </span>
       )}
 
-      <h2 className={styles.sectionTitle}>
+      <h2
+        className={styles.sectionTitle}
+      >
         <span>{children}</span>
 
         <img
@@ -509,21 +560,191 @@ function SectionTitle({
 }
 
 export default function HomePage() {
+
+  const [
+    pixFeedback,
+    setPixFeedback,
+  ] = useState("");
+
+  const [
+    pixCopied,
+    setPixCopied,
+  ] = useState(false);
+
+  const pixConfigured =
+    PIX_COPIA_E_COLA &&
+    !PIX_COPIA_E_COLA.includes(
+      "COLE_AQUI"
+    );
+
+  function showPixFeedback(
+    message,
+    copied = false
+  ) {
+    setPixFeedback(message);
+    setPixCopied(copied);
+
+    window.setTimeout(() => {
+      setPixFeedback("");
+      setPixCopied(false);
+    }, 3000);
+  }
+
+  async function copyPixToClipboard() {
+    if (!pixConfigured) {
+      showPixFeedback(
+        "Configure primeiro o código PIX Copia e Cola."
+      );
+
+      return false;
+    }
+
+    try {
+      await navigator.clipboard.writeText(
+        PIX_COPIA_E_COLA
+      );
+
+      showPixFeedback(
+        "Código PIX copiado!",
+        true
+      );
+
+      return true;
+    } catch (error) {
+      /*
+       * Fallback para navegadores em que
+       * navigator.clipboard não estiver
+       * disponível.
+       */
+      try {
+        const textArea =
+          document.createElement(
+            "textarea"
+          );
+
+        textArea.value =
+          PIX_COPIA_E_COLA;
+
+        textArea.style.position =
+          "fixed";
+
+        textArea.style.opacity = "0";
+
+        document.body.appendChild(
+          textArea
+        );
+
+        textArea.focus();
+        textArea.select();
+
+        const copied =
+          document.execCommand(
+            "copy"
+          );
+
+        textArea.remove();
+
+        if (!copied) {
+          throw new Error(
+            "Não foi possível copiar."
+          );
+        }
+
+        showPixFeedback(
+          "Código PIX copiado!",
+          true
+        );
+
+        return true;
+      } catch {
+        showPixFeedback(
+          "Não foi possível copiar o código PIX."
+        );
+
+        return false;
+      }
+    }
+  }
+
+  async function handleSharePix() {
+    if (!pixConfigured) {
+      showPixFeedback(
+        "Configure primeiro o código PIX Copia e Cola."
+      );
+
+      return;
+    }
+
+    const shareData = {
+      title:
+        "Doação via PIX - ARA Campus Pets",
+
+      text:
+        "Apoie o ARA Campus Pets através do PIX.\n\n" +
+        "Código PIX Copia e Cola:\n" +
+        PIX_COPIA_E_COLA,
+    };
+
+    if (
+      typeof navigator.share ===
+      "function"
+    ) {
+      try {
+        await navigator.share(
+          shareData
+        );
+
+        return;
+      } catch (error) {
+        /*
+         * Não fazemos nada quando o próprio
+         * usuário fecha a tela de compartilhar.
+         */
+        if (
+          error?.name ===
+          "AbortError"
+        ) {
+          return;
+        }
+      }
+    }
+
+    const copied =
+      await copyPixToClipboard();
+
+    if (copied) {
+      showPixFeedback(
+        "Compartilhamento não disponível neste navegador. O código PIX foi copiado.",
+        true
+      );
+    }
+  }
+
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        <div className={styles.headerInner}>
+      <header
+        className={styles.header}
+      >
+        <div
+          className={
+            styles.headerInner
+          }
+        >
           <a
             href="#inicio"
             className={styles.brand}
             aria-label="Ir para o início"
           >
             <img
-              src={doguinhosLogo}
+              src={logoDoguinhos}
               alt="ARA Campus Pets"
             />
 
-            <div className={styles.brandText}>
+            <div
+              className={
+                styles.brandText
+              }
+            >
               <strong>
                 ARA Campus Pets
               </strong>
@@ -560,7 +781,9 @@ export default function HomePage() {
 
             <Link
               to="/login"
-              className={styles.loginLink}
+              className={
+                styles.loginLink
+              }
             >
               <LogIn size={17} />
 
@@ -591,7 +814,9 @@ export default function HomePage() {
             Visão geral e missão
           </SectionTitle>
 
-          <div className={styles.aboutGrid}>
+          <div
+            className={styles.aboutGrid}
+          >
             <div
               className={
                 styles.aboutImageWrapper
@@ -623,7 +848,11 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className={styles.aboutContent}>
+            <div
+              className={
+                styles.aboutContent
+              }
+            >
               <h3>
                 Cuidar, conscientizar e
                 encontrar novos lares
@@ -649,8 +878,14 @@ export default function HomePage() {
                 animais.
               </p>
 
-              <div className={styles.missionCard}>
-                <strong>Nossa missão</strong>
+              <div
+                className={
+                  styles.missionCard
+                }
+              >
+                <strong>
+                  Nossa missão
+                </strong>
 
                 <p>
                   Promover dignidade e
@@ -665,34 +900,54 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className={styles.statsSection}>
-          <div className={styles.statsInner}>
-            <div className={styles.statsGrid}>
-              {projectStats.map((stat) => (
-                <article
-                  key={stat.id}
-                  className={styles.statCard}
-                >
-                  <strong
+        <section
+          className={
+            styles.statsSection
+          }
+        >
+          <div
+            className={
+              styles.statsInner
+            }
+          >
+            <div
+              className={
+                styles.statsGrid
+              }
+            >
+              {projectStats.map(
+                (stat) => (
+                  <article
+                    key={stat.id}
                     className={
-                      styles.statValue
+                      styles.statCard
                     }
                   >
-                    {stat.value}
-                  </strong>
+                    <strong
+                      className={
+                        styles.statValue
+                      }
+                    >
+                      {stat.value}
+                    </strong>
 
-                  <span
-                    className={
-                      styles.statLabel
-                    }
-                  >
-                    {stat.label}
-                  </span>
-                </article>
-              ))}
+                    <span
+                      className={
+                        styles.statLabel
+                      }
+                    >
+                      {stat.label}
+                    </span>
+                  </article>
+                )
+              )}
             </div>
 
-            <p className={styles.statsNote}>
+            <p
+              className={
+                styles.statsNote
+              }
+            >
               Dados históricos divulgados
               pelo projeto. As informações
               serão atualizadas futuramente
@@ -712,7 +967,11 @@ export default function HomePage() {
             Principais ações
           </SectionTitle>
 
-          <div className={styles.actionsGrid}>
+          <div
+            className={
+              styles.actionsGrid
+            }
+          >
             {projectActions.map(
               (action) => (
                 <article
@@ -738,7 +997,9 @@ export default function HomePage() {
                       styles.actionContent
                     }
                   >
-                    <h3>{action.title}</h3>
+                    <h3>
+                      {action.title}
+                    </h3>
 
                     <p>
                       {action.description}
@@ -752,9 +1013,15 @@ export default function HomePage() {
 
         <section
           id="ajude"
-          className={styles.helpSection}
+          className={
+            styles.helpSection
+          }
         >
-          <div className={styles.helpInner}>
+          <div
+            className={
+              styles.helpInner
+            }
+          >
             <SectionTitle
               eyebrow="Participe"
               description="Existem diferentes maneiras de contribuir com o cuidado e o acompanhamento dos animais."
@@ -762,31 +1029,176 @@ export default function HomePage() {
               Como você pode ajudar
             </SectionTitle>
 
-            <div className={styles.helpGrid}>
-              {helpOptions.map((option) => {
-                const Icon = option.Icon;
+            <div
+              className={
+                styles.helpGrid
+              }
+            >
+              {helpOptions.map(
+                (option) => {
+                  const Icon =
+                    option.Icon;
 
-                return (
-                  <article
-                    key={option.id}
-                    className={styles.helpCard}
-                  >
-                    <div
+                  return (
+                    <article
+                      key={option.id}
                       className={
-                        styles.helpIcon
+                        styles.helpCard
                       }
                     >
-                      <Icon size={25} />
-                    </div>
+                      <div
+                        className={
+                          styles.helpIcon
+                        }
+                      >
+                        <Icon size={25} />
+                      </div>
 
-                    <h3>{option.title}</h3>
+                      <h3>
+                        {option.title}
+                      </h3>
 
-                    <p>
-                      {option.description}
-                    </p>
-                  </article>
-                );
-              })}
+                      <p>
+                        {
+                          option.description
+                        }
+                      </p>
+                    </article>
+                  );
+                }
+              )}
+            </div>
+
+            <div
+              className={
+                styles.pixPanel
+              }
+            >
+              <div
+                className={
+                  styles.pixContent
+                }
+              >
+                <span
+                  className={
+                    styles.pixEyebrow
+                  }
+                >
+                  Apoie o projeto
+                </span>
+
+                <h3>
+                  Faça uma doação via PIX
+                </h3>
+
+                <p>
+                  As doações ajudam a
+                  custear ração,
+                  medicamentos, consultas,
+                  exames, castrações,
+                  materiais de higiene e
+                  outros cuidados
+                  necessários aos animais
+                  acompanhados pelo projeto.
+                </p>
+
+                <div
+                  className={
+                    styles.pixHighlight
+                  }
+                >
+                  <HeartHandshake
+                    size={20}
+                  />
+
+                  <span>
+                    Toda contribuição ajuda
+                    a manter as ações do
+                    ARA Campus Pets.
+                  </span>
+                </div>
+                <div
+                  className={
+                    styles.pixActions
+                  }
+                >
+                  <button
+                    type="button"
+                    className={
+                      styles.pixCopyButton
+                    }
+                    onClick={
+                      copyPixToClipboard
+                    }
+                  >
+                    {pixCopied ? (
+                      <Check size={18} />
+                    ) : (
+                      <Copy size={18} />
+                    )}
+
+                    <span>
+                      {pixCopied
+                        ? "Código copiado"
+                        : "Copiar código PIX"}
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className={
+                      styles.pixShareButton
+                    }
+                    onClick={
+                      handleSharePix
+                    }
+                  >
+                    <Share2 size={18} />
+
+                    <span>
+                      Compartilhar PIX
+                    </span>
+                  </button>
+                </div>
+
+                {pixFeedback && (
+                  <p
+                    className={
+                      styles.pixFeedback
+                    }
+                    role="status"
+                    aria-live="polite"
+                  >
+                    {pixFeedback}
+                  </p>
+                )}
+              </div>
+
+              <div
+                className={
+                  styles.pixQrArea
+                }
+              >
+                <div
+                  className={
+                    styles.pixQrCode
+                  }
+                >
+                  <img
+                    src={pixQrCode}
+                    alt="QR Code para doação via PIX ao ARA Campus Pets"
+                  />
+                </div>
+
+                <strong>
+                  Doação via PIX
+                </strong>
+
+                <span>
+                  Aponte a câmera do celular
+                  para o QR Code.
+                </span>
+              </div>
             </div>
 
             <div
@@ -827,7 +1239,9 @@ export default function HomePage() {
               </div>
 
               <a
-                href={VOLUNTEER_FORM_URL}
+                href={
+                  VOLUNTEER_FORM_URL
+                }
                 target="_blank"
                 rel="noopener noreferrer"
                 className={
@@ -852,72 +1266,137 @@ export default function HomePage() {
             Adote nossos animais
           </SectionTitle>
 
-          <div className={styles.animalGrid}>
-            {animals.map((animal) => (
-              <article
-                key={animal.id}
-                className={styles.animalCard}
+          <div
+            className={
+              styles.animalGrid
+            }
+          >
+            {animals.map(
+              (animal) => (
+                <article
+                  key={animal.id}
+                  className={
+                    styles.animalCard
+                  }
+                >
+                  <div
+                    className={
+                      styles.animalPhoto
+                    }
+                  >
+                    <ImageWithFallback
+                      src={animal.photo}
+                      alt={`Foto de ${animal.name}`}
+                      name={animal.name}
+                      fallback="A"
+                    />
+
+                    <span
+                      className={
+                        styles.availableBadge
+                      }
+                    >
+                      Disponível para adoção
+                    </span>
+                  </div>
+
+                  <div
+                    className={
+                      styles.animalContent
+                    }
+                  >
+                    <h3
+                      className={
+                        styles.animalName
+                      }
+                    >
+                      {animal.name}
+                    </h3>
+
+                    <span
+                      className={
+                        styles.animalDetails
+                      }
+                    >
+                      {animal.details}
+                    </span>
+
+                    <p
+                      className={
+                        styles.animalDescription
+                      }
+                    >
+                      {
+                        animal.description
+                      }
+                    </p>
+                  </div>
+                </article>
+              )
+            )}
+          </div>
+
+          <div
+            className={
+              styles.adoptionCta
+            }
+          >
+            <div
+              className={
+                styles.adoptionCtaContent
+              }
+            >
+              <span
+                className={
+                  styles.adoptionCtaEyebrow
+                }
               >
-                <div
-                  className={
-                    styles.animalPhoto
-                  }
-                >
-                  <ImageWithFallback
-                    src={animal.photo}
-                    alt={`Foto de ${animal.name}`}
-                    name={animal.name}
-                    fallback="A"
-                  />
+                Interessado em adotar?
+              </span>
 
-                  <span
-                    className={
-                      styles.availableBadge
-                    }
-                  >
-                    Disponível para adoção
-                  </span>
-                </div>
+              <h3>
+                Dê o primeiro passo para
+                uma adoção responsável
+              </h3>
 
-                <div
-                  className={
-                    styles.animalContent
-                  }
-                >
-                  <h3
-                    className={
-                      styles.animalName
-                    }
-                  >
-                    {animal.name}
-                  </h3>
+              <p>
+                Preencha nosso formulário
+                de interesse em adoção.
+                A equipe poderá entrar em
+                contato para orientar sobre
+                as próximas etapas e
+                conhecer melhor o perfil
+                do adotante.
+              </p>
+            </div>
 
-                  <span
-                    className={
-                      styles.animalDetails
-                    }
-                  >
-                    {animal.details}
-                  </span>
-
-                  <p
-                    className={
-                      styles.animalDescription
-                    }
-                  >
-                    {animal.description}
-                  </p>
-                </div>
-              </article>
-            ))}
+            <a
+              href={
+                ADOPTION_FORM_URL
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+              className={
+                styles.adoptionFormButton
+              }
+            >
+              Quero adotar
+              <ArrowRight size={18} />
+            </a>
           </div>
         </section>
 
         <section
           id="equipe"
-          className={styles.teamSection}
+          className={
+            styles.teamSection
+          }
         >
-          <div className={styles.teamInner}>
+          <div
+            className={
+              styles.teamInner
+            }
+          >
             <SectionTitle
               eyebrow="Pessoas que fazem acontecer"
               description="O projeto é construído por pessoas que compartilham responsabilidades, conhecimento e cuidado."
@@ -925,38 +1404,48 @@ export default function HomePage() {
               Nossa equipe
             </SectionTitle>
 
-            <div className={styles.teamGrid}>
-              {team.map((member) => (
-                <article
-                  key={member.id}
-                  className={styles.teamCard}
-                >
-                  <div
+            <div
+              className={
+                styles.teamGrid
+              }
+            >
+              {team.map(
+                (member) => (
+                  <article
+                    key={member.id}
                     className={
-                      styles.teamPhoto
+                      styles.teamCard
                     }
                   >
-                    <ImageWithFallback
-                      src={member.photo}
-                      alt={`Foto de ${member.name}`}
-                      name={member.name}
-                      fallback="U"
-                    />
-                  </div>
+                    <div
+                      className={
+                        styles.teamPhoto
+                      }
+                    >
+                      <ImageWithFallback
+                        src={member.photo}
+                        alt={`Foto de ${member.name}`}
+                        name={member.name}
+                        fallback="U"
+                      />
+                    </div>
 
-                  <div
-                    className={
-                      styles.teamContent
-                    }
-                  >
-                    <h3>{member.name}</h3>
+                    <div
+                      className={
+                        styles.teamContent
+                      }
+                    >
+                      <h3>
+                        {member.name}
+                      </h3>
 
-                    <span>
-                      {member.role}
-                    </span>
-                  </div>
-                </article>
-              ))}
+                      <span>
+                        {member.role}
+                      </span>
+                    </div>
+                  </article>
+                )
+              )}
             </div>
           </div>
         </section>
@@ -972,39 +1461,66 @@ export default function HomePage() {
             Parceiros e apoiadores
           </SectionTitle>
 
-          <div className={styles.partnersGrid}>
-            {partners.map((partner) => (
-              <article
-                key={partner.id}
-                className={styles.partnerCard}
-              >
-                <div
+          <div
+            className={
+              styles.partnersGrid
+            }
+          >
+            {partners.map(
+              (partner) => (
+                <article
+                  key={partner.id}
                   className={
-                    styles.partnerIcon
+                    styles.partnerCard
                   }
                 >
-                  <HeartHandshake
-                    size={27}
-                  />
-                </div>
+                  <div
+                    className={
+                      styles.partnerIcon
+                    }
+                  >
+                    <HeartHandshake
+                      size={27}
+                    />
+                  </div>
 
-                <h3>{partner.name}</h3>
+                  <h3>
+                    {partner.name}
+                  </h3>
 
-                <p>
-                  {partner.description}
-                </p>
-              </article>
-            ))}
+                  <p>
+                    {
+                      partner.description
+                    }
+                  </p>
+                </article>
+              )
+            )}
           </div>
         </section>
       </main>
 
-      <footer className={styles.footer}>
-        <div className={styles.footerInner}>
-          <div className={styles.footerBrand}>
-            <div className={styles.footerLogo}>
+      <footer
+        id="contato"
+        className={styles.footer}
+      >
+        <div
+          className={
+            styles.footerInner
+          }
+        >
+          <div
+            className={
+              styles.footerBrand
+            }
+          >
+            <div
+              className={
+                styles.footerLogo
+              }
+            >
               <img
-                src={doguinhosLogo}
+                src={logoDoguinhos}
                 alt="ARA Campus Pets"
               />
             </div>
@@ -1028,9 +1544,15 @@ export default function HomePage() {
               styles.footerNavigation
             }
           >
-            <strong>Navegação</strong>
+            <strong>
+              Navegação
+            </strong>
 
-            <nav className={styles.footerNav}>
+            <nav
+              className={
+                styles.footerNav
+              }
+            >
               <a href="#projeto">
                 O projeto
               </a>
@@ -1058,7 +1580,9 @@ export default function HomePage() {
               styles.footerLocation
             }
           >
-            <strong>Localização</strong>
+            <strong>
+              Localização
+            </strong>
 
             <p>
               <MapPin size={18} />
@@ -1075,12 +1599,97 @@ export default function HomePage() {
                 styles.partnersLogo
               }
             >
-              <img
-                src={ifalLogo}
-                alt="Instituições parceiras"
-              />
-              
+              <div
+                className={
+                  styles.institutionLogoCard
+                }
+              >
+                <img
+                  src={logoUfal}
+                  alt="Universidade Federal de Alagoas"
+                  className={
+                    styles.ufalLogo
+                  }
+                />
+              </div>
+
+              <div
+                className={
+                  styles.institutionLogoCard
+                }
+              >
+                <img
+                  src={logoIfal}
+                  alt="Instituto Federal de Alagoas"
+                  className={
+                    styles.ifalLogo
+                  }
+                />
+              </div>
             </div>
+          </div>
+
+          <div
+            className={
+              styles.footerContact
+            }
+          >
+            <strong>
+              Entre em contato
+            </strong>
+
+            <p>
+              Acompanhe as ações do projeto
+              e fale com nossa equipe.
+            </p>
+
+            <div
+              className={
+                styles.socialLinks
+              }
+            >
+              <a
+                href={INSTAGRAM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram do ARA Campus Pets"
+                title="Instagram"
+              >
+               <img
+                src={instagramIcon}
+                alt=""
+              />
+              </a>
+
+              <a
+                href={TIKTOK_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="TikTok do ARA Campus Pets"
+                title="TikTok"
+              >
+                <img
+                  src={tiktokIcon}
+                  alt=""
+                />
+              </a>
+
+              <a
+                href={`mailto:${CONTACT_EMAIL}`}
+                aria-label="Enviar e-mail para o ARA Campus Pets"
+                title="E-mail"
+              >
+                <Mail size={21} />
+              </a>
+            </div>
+
+            <a
+              href={`mailto:${CONTACT_EMAIL}`}
+              className={
+                styles.footerEmail
+              }
+            >
+            </a>
           </div>
         </div>
 
@@ -1090,11 +1699,14 @@ export default function HomePage() {
           }
         >
           <span>
-            © {new Date().getFullYear()} ARA Campus Pets
+            ©{" "}
+            {new Date().getFullYear()}{" "}
+            ARA Campus Pets
           </span>
 
           <span>
-            Plataforma desenvolvida como projeto de extensão.
+            Plataforma desenvolvida como
+            projeto de extensão.
           </span>
         </div>
       </footer>

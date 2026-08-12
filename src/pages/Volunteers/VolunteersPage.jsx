@@ -374,7 +374,11 @@ export default function VolunteersPage() {
               status
             );
 
+          const isVolunteer =
+            !isAdministrator(user);
+
           return (
+            isVolunteer &&
             matchesTab &&
             matchesStatus
           );
